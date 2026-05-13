@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>פרויקט גמר — יסודות לינוקס</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../he/index.html">אקדמיה</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">קורס 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">עברית</a>
+    <span class="sep">/</span>
+    <span class="here">פרויקט גמר</span>
+    <span class="lang-switch">
+      <a href="../../en/final/project.html">EN</a>
+      <a href="project.html" class="active">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">קורס 01 · יסודות לינוקס · פרויקט גמר</div>
+    <h1>פרויקט גמר — להפוך מכונת לינוקס לשלכם</h1>
+    <p class="lede">להקים מכונת לינוקס חדשה, להתאים אותה מקצה לקצה, ולתעד מה קורה מתחת. הפרויקט שמחבר את כל המעבדות בקורס.</p>
+
+    <table class="meta">
+      <tbody>
+        <tr><th>קורס</th><td>01 — יסודות לינוקס</td></tr>
+        <tr><th>זמן</th><td>3–5 שעות (פרוס על כמה ישיבות)</td></tr>
+        <tr><th>תוצר</th><td>ריפו Git (או <code>.tar.gz</code>) הכולל: <code>README.md</code>, <code>boot.md</code>, <code>system-report.txt</code>, <code>users.md</code>, <code>storage.md</code>, <code>dotfiles/</code>, <code>bin/</code>, <code>systemd/</code></td></tr>
+        <tr><th>פורמט</th><td>דחיפה ל-GitHub (מועדף) — הגישו את ה-URL של הריפו — או ארכיון כקובץ.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>היכולת שמוכחת</h2>
+    <p>אתם יכולים לשבת מול מכונת לינוקס חדשה ולא מוכרת ובתוך שעה להפוך אותה למתאימה לדרך שלכם — עם prompt קריא, aliases שמתאימים להרגלים שלכם, <code>$PATH</code> עובד שכולל סקריפטים משלכם, והבנה ברורה של מה המכונה <em>באמת</em> עשתה בין הדלקה ל-login.</p>
+    <p>זה ההבדל בין "אני יודע להריץ פקודות" ל"המכונה הזו שלי."</p>
+
+    <h2>הברירה</h2>
+    <p>נמסרת לכם מכונת לינוקס חדשה. היא עולה ישר ל-shell עם ברירות מחדל, צבעי ברירת מחדל, בלי aliases, בלי סקריפטים מותאמים, בלי סיפור. המשימה שלכם: <strong>להפוך אותה לשלכם</strong>, ולתעד גם מה עשיתם וגם איך המכונה נראתה מתחת.</p>
+    <p>זה בדיוק מה שכל מהנדס/ת עושה במחשב נייד חדש או בכל פעם שמקימים שרת. תרגול מודע של זה פעם אחת מאיץ את כל הקריירה שלכם על לינוקס.</p>
+
+    <h2>דרישות</h2>
+
+    <h3>1 · להקים מכונת לינוקס אמיתית</h3>
+    <p>כל אחד מאלה מתאים:</p>
+    <ul>
+      <li>VM מקומי (multipass, UTM, VirtualBox, Lima, VMware) שמריץ Ubuntu, Debian, Fedora, Arch או דומה — כל דבר עם <code>systemd</code>.</li>
+      <li>VM בענן (DigitalOcean droplet, AWS EC2, GCP Compute, Linode, Hetzner — אפילו free tier).</li>
+      <li>WSL2 ב-Windows (עובד, אבל סקציית ה-boot תהיה חריגה — תרשמו את זה ב-<code>boot.md</code>).</li>
+    </ul>
+    <p>זה חייב להיות <strong>טרי</strong>. אל תשתמשו ב-dotfiles הקיימים שלכם או במכונה שאתם משתמשים בה יומיומית.</p>
+
+    <h3>2 · להתאים את סביבת ה-shell</h3>
+    <p>בקובץ rc של ה-shell שלכם (<code>~/.bashrc</code> או <code>~/.zshrc</code>), הקימו:</p>
+    <ul>
+      <li><strong>לפחות 3 aliases</strong> שאתם באמת תשתמשו בהם יומיומית. דוגמאות: <code>ll='ls -lah'</code>, <code>gs='git status'</code>, <code>..='cd ..'</code>. לא להעתיק רשימות גנריות — בחרו כאלה שמתאימים לאיך שאתם חושבים.</li>
+      <li><strong><code>PS1</code> מותאם</strong> שמציג לפחות שם משתמש, hostname, ותיקיית עבודה. בונוס: צבע, ה-git branch הנוכחי.</li>
+      <li><strong><code>$PATH</code> מעודכן</strong> שכולל <code>~/bin</code> (בהתחלה, כדי שהסקריפטים שלכם ינצחו פקודות מערכת בשם זהה).</li>
+    </ul>
+    <p>Aliases / PS1 / PATH חייבים <strong>לשרוד shell חדש</strong> — המבחן: סגרו את הטרמינל, פתחו מחדש, ה-alias עדיין עובד בלי להריץ שום דבר.</p>
+
+    <h3>3 · לכתוב לפחות סקריפט אחד ב-<code>~/bin</code></h3>
+    <p>כל סקריפט שתשתמשו בו באמת. דוגמאות:</p>
+    <ul>
+      <li><code>up</code> — מריץ <code>apt update &amp;&amp; apt upgrade</code> (או המקבילה בדיסטרו שלכם) עם sudo.</li>
+      <li><code>weather</code> — <code>curl wttr.in/Tel-Aviv</code> או דומה.</li>
+      <li><code>backup-notes</code> — מריץ rsync של <code>~/notes</code> לתיקיית backup עם timestamp.</li>
+      <li><code>greet</code> — הסקריפט ממעבדה 02, נשמר.</li>
+    </ul>
+    <p>הסקריפט חייב להיות executable (<code>chmod +x</code>), עם shebang (<code>#!/usr/bin/env bash</code>), ולרוץ <strong>מכל תיקייה</strong> (מוכיח שה-<code>$PATH</code> מוגדר נכון).</p>
+
+    <h3>4 · לכתוב <code>boot.md</code> — סיפור ה-boot של המכונה</h3>
+    <p>תעדו את רצף ה-boot כפי שנצפה ב-VM שלכם. השתמשו בתבנית של מעבדה 03 כנקודת התחלה, אבל כל ערך חייב להיות מהמכונה שלכם.</p>
+    <p>לכסות לפחות:</p>
+    <ul>
+      <li>Firmware/bootloader שהדיסטרו משתמש בו (BIOS/UEFI, GRUB/systemd-boot).</li>
+      <li>גרסת קרנל (מתוך <code>uname -r</code>) ו-5 השורות הראשונות של <code>dmesg</code>.</li>
+      <li>ה-systemd target ברירת המחדל במכונה שלכם, ועוד 3 שירותים שהתחילו ב-boot (השתמשו ב-<code>systemctl list-units --type=service</code>).</li>
+      <li>דוגמה אחת לכל אחד מ-7 סוגי הקבצים (<code>-</code>, <code>d</code>, <code>l</code>, <code>c</code>, <code>b</code>, <code>p</code>, <code>s</code>) — פלט מלא של <code>ls -l</code>.</li>
+      <li>שלוש תיקיות FHS שפתחתם באמת, עם הערה אחת לכל תיקייה ("<code>/etc</code> במכונה זו מכיל 142 קבצים. המעניין ביותר היה…").</li>
+    </ul>
+
+    <h3>5 · לבנות <code>system-report.txt</code> עם pipes</h3>
+    <p>קובץ אחד. שנוצר על ידי לפחות <strong>שלוש קומפוזיציות שונות</strong> עם pipes, הפניות או globs. דוגמה:</p>
+<pre><code>{
+  echo "=== 10 הקבצים הגדולים ב-/var/log ==="
+  ls -lS /var/log 2&gt;/dev/null | head -n 11
+
+  echo "=== מספר חבילות מותקנות ==="
+  dpkg -l 2&gt;/dev/null | grep -c "^ii" || rpm -qa 2&gt;/dev/null | wc -l
+
+  echo "=== משתמשים עם login shells ==="
+  cat /etc/passwd | grep -v "/nologin\|/false" | cut -d: -f1
+} &gt; system-report.txt</code></pre>
+    <p>המטרה אינה ה-pipelines המדויקים — אלא ש<strong>הרכבתם אותם בעצמכם</strong> והקובץ מוכיח שאתם מבינים את אינסטלציית ה-shell.</p>
+
+    <h3>6 · הוסיפו משתמש לא-root עם קבוצה משותפת</h3>
+    <p>המכונה שקיבלתם הופעלה כ-<code>root</code> או כמשתמש ברירת מחדל של הענן. <strong>אל תפעלו כ-root לטווח הארוך.</strong> צרו משתמש אמיתי לעצמכם, פלוס קבוצה משותפת, והשתמשו בהרשאות הנכונות על תיקייה משותפת:</p>
+    <ul>
+      <li>צרו משתמש חדש (השם שלכם) עם תיקיית בית ו-shell אמיתי.</li>
+      <li>הוסיפו אותו ל-<code>sudo</code> (או <code>wheel</code> ב-RHEL) כדי שיוכל להריץ פקודות פריבילגיות.</li>
+      <li>צרו קבוצה <code>devs</code>, הוסיפו את עצמכם, וגרמו ל-<code>/srv/shared</code> להיות בבעלות <code>root:devs</code> במצב <code>2775</code> (SGID — ראו מעבדה 04).</li>
+      <li>אמתו עם <code>id</code>, <code>getent</code>, ו-<code>ls -ld /srv/shared</code>.</li>
+    </ul>
+    <p>תעדו את הפקודות המדויקות ב-<code>users.md</code>, כולל העתק של שורות <code>/etc/passwd</code> ו-<code>/etc/group</code> שהוספתם.</p>
+
+    <h3>7 · מאונטו volume נוסף</h3>
+    <p>הוסיפו אחסון מעבר ל-filesystem הראשי וגרמו לו לשרוד reboot:</p>
+    <ul>
+      <li>אפשר לחבר דיסק שני (UI של הענן / ה-VM host) <em>או</em> ליצור loopback device מקובץ רגיל (ראו מעבדה 05).</li>
+      <li>פרמטו אותו עם <code>ext4</code> (או <code>xfs</code>), תנו לו label, ומאונטו אותו ב-<code>/data</code>.</li>
+      <li>שמרו את ה-mount ב-<code>/etc/fstab</code> לפי <strong>UUID</strong> (לעולם לא device path) עם <code>nofail</code>.</li>
+      <li>הריצו reboot. אמתו שה-mount שורד — בדקו עם <code>findmnt /data</code>.</li>
+    </ul>
+    <p>תעדו את ה-layout (פלט <code>lsblk</code> לפני ואחרי) ואת שורת ה-<code>/etc/fstab</code> שלכם ב-<code>storage.md</code>.</p>
+
+    <h3>8 · פרסו שירות systemd מותאם</h3>
+    <p>החליפו את הריפלקס של cron בזוג אמיתי של <code>.service</code> + <code>.timer</code> (ראו מעבדה 05):</p>
+    <ul>
+      <li>כתבו סקריפט קטן תחת <code>/usr/local/bin/</code> שעושה משהו שימושי — מוסיף heartbeat ל-<code>/data/heartbeat.log</code>, שומר snapshot של <code>df -h</code>, או מסובב את דוח המערכת שלכם.</li>
+      <li>שמרו קובץ <code>.service</code> תחת <code>/etc/systemd/system/</code> שמריץ את הסקריפט כמשתמש הלא-root שלכם.</li>
+      <li>שמרו קובץ <code>.timer</code> מותאם שמפעיל אותו לפי לוח זמנים (כל 5 דקות זה מספיק לדמו).</li>
+      <li><code>systemctl daemon-reload</code>, <code>enable --now</code> את ה-timer, אז בדקו <code>systemctl list-timers</code> ו-<code>journalctl -u &lt;svc&gt; -f</code>.</li>
+    </ul>
+    <p>הוסיפו את שני קבצי ה-unit לריפו תחת <code>systemd/</code>.</p>
+
+    <h3>9 · הגישו כריפו Git</h3>
+    <p>אתחלו Git ב-VM. שימו את התוצרים תחת מבנה הגיוני:</p>
+<pre><code>my-linux-final/
+├── README.md              # פתיחה של דף אחד: מה כאן, איך לקרוא
+├── boot.md                # נרטיב ה-boot שלכם
+├── users.md               # איך הקמתם את המשתמש, הקבוצה, /srv/shared
+├── storage.md             # מבנה הדיסקים + שורת ה-fstab שלכם
+├── system-report.txt      # snapshot מערכת שנבנה ב-pipes
+├── dotfiles/
+│   ├── bashrc-snippet     # השורות שהוספתם ל-~/.bashrc
+│   └── ps1-example.txt    # screenshot או העתק של ה-prompt
+├── bin/
+│   └── greet              # (או הסקריפט האחר שלכם)
+└── systemd/
+    ├── heartbeat.service  # ה-service unit שלכם
+    └── heartbeat.timer    # ה-timer המותאם</code></pre>
+    <p>דחפו ל-GitHub והגישו את ה-URL של הריפו.</p>
+
+    <h2>קריטריוני הצלחה</h2>
+    <p>עברתם כשבודק/ת יכול/ה:</p>
+    <ol>
+      <li>לקרוא את ה-<code>README.md</code> שלכם ולהבין את הסקופ של מה עשיתם תוך פחות משתי דקות.</li>
+      <li>לוודא שה-aliases שלכם אמיתיים (להעתיק לתוך shell משלהם — הם עובדים).</li>
+      <li>לקרוא <code>boot.md</code> ולמצוא ערכים קונקרטיים וספציפיים למכונה (לא placeholders של תבנית) לכל שלב ב-boot, סוגי הקבצים, והערות ה-FHS.</li>
+      <li>לקרוא <code>system-report.txt</code> ולומר איזה pipe / redirect / glob הפיק כל סקציה.</li>
+      <li>להסתכל על הסקריפט ב-<code>bin/</code>, להריץ עליו <code>shellcheck</code>, ולא לראות אזהרות קריטיות.</li>
+      <li>לקרוא <code>users.md</code> ולאמת שיצרתם משתמש אמיתי לא-root עם sudo + תיקייה משותפת <code>/srv/shared</code> עם SGID.</li>
+      <li>לקרוא <code>storage.md</code>, לראות שורת fstab מבוססת UUID, ולאמת שה-volume הנוסף מאונטם ב-<code>/data</code> אחרי reboot.</li>
+      <li>להעתיק את קבצי ה-unit מתיקיית <code>systemd/</code> שלכם למכונה אחרת, להריץ <code>daemon-reload</code>, להפעיל את ה-timer, ולראות אותו רץ מקצה לקצה דרך <code>journalctl</code>.</li>
+    </ol>
+
+    <h2>מה <em>לא</em> מודדים</h2>
+    <ul>
+      <li>אסתטיקה של ה-prompt. שיעבוד בשבילכם.</li>
+      <li>איזה דיסטרו בחרתם.</li>
+      <li>כמה aliases מעבר לשלושה הנדרשים — שלושה אמיתיים מנצחים שלושים שהועתקו.</li>
+      <li>אם השתמשתם ב-bash או zsh.</li>
+    </ul>
+
+    <h2>אתגרים (אופציונלי, אך מומלץ)</h2>
+    <ul>
+      <li><strong>שני dotfiles נוספים:</strong> הוסיפו <code>~/.gitconfig</code> עם שם + email שלכם, ו-<code>~/.tmux.conf</code> אם אתם משתמשים ב-tmux.</li>
+      <li><strong>סקריפט התקנה:</strong> כתבו <code>setup.sh</code> בריפו שלכם, שכשמריצים אותו על VM חדש, מקים את הכל על ידי symlinks של dotfiles והוספת סקריפטים ל-<code>~/bin</code>. אידמפוטנטי.</li>
+      <li><strong>One-liner לבריאות שירותים:</strong> הוסיפו ל-<code>system-report.txt</code> את מספר ה-units שנכשלו (<code>systemctl --failed</code>), והסבירו ב-<code>boot.md</code> מה כל כשל אומר במכונה שלכם.</li>
+      <li><strong>פרסום פומבי של הריפו:</strong> הפכו אותו לפומבי. הסטודנט/ית הבא/ה בתוכנית יכול/ה ללמוד מההגדרה שלכם.</li>
+    </ul>
+
+    <h2>משאבים</h2>
+    <ul>
+      <li><a href="../homework/lab-01-cli-tour.html">מעבדה 01 — סיור CLI</a></li>
+      <li><a href="../homework/lab-02-pipes-and-path.html">מעבדה 02 — Pipes ו-PATH</a></li>
+      <li><a href="../homework/lab-03-boot-and-fhs.html">מעבדה 03 — Boot ו-FHS</a></li>
+      <li><a href="../homework/lab-04-permissions-and-users.html">מעבדה 04 — הרשאות ומשתמשים</a></li>
+      <li><a href="../homework/lab-05-storage-and-services.html">מעבדה 05 — אחסון ושירותים</a></li>
+      <li><a href="../docs/cheat-sheet.html">דף עזר</a></li>
+      <li><a href="../syllabus.html">סילבוס</a></li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>קורס 01 — יסודות לינוקס · פרויקט גמר</span>
+      <span><a href="../index.html">↩ דף הקורס</a></span>
+    </footer>
+  </article>
+</body>
+</html>

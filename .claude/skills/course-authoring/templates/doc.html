@@ -1,0 +1,73 @@
+<!doctype html>
+<!--
+  Template for any student-facing HTML artifact (syllabus, lab, doc, final).
+  When you copy this into a course folder, set the `<link>` href to point at
+  the shared stylesheet from the file's depth:
+
+    courses/<NN-id>/<file>.html             ->  ../../assets/styles.css
+    courses/<NN-id>/homework/<file>.html    ->  ../../../assets/styles.css
+    courses/<NN-id>/docs/<file>.html        ->  ../../../assets/styles.css
+    courses/<NN-id>/final/<file>.html       ->  ../../../assets/styles.css
+
+  And set the site-nav breadcrumbs to the artifact's location.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title><!-- Title --></title>
+  <link rel="stylesheet" href="../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../index.html">Academy</a>
+    <span class="sep">/</span>
+    <a href="index.html">Course NN &mdash; &lt;Course title&gt;</a>
+    <span class="sep">/</span>
+    <span class="here">&lt;Artifact name&gt;</span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">Course NN &middot; &lt;Course title&gt;</div>
+    <h1>&lt;Artifact title&gt;</h1>
+    <p class="lede">&lt;One-sentence summary &mdash; what this artifact is and when to reach for it.&gt;</p>
+
+    <!-- Replace the example sections below with the real ones. -->
+
+    <h2>&lt;Section heading&gt;</h2>
+    <p>&lt;Prose. Keep paragraphs short.&gt;</p>
+
+    <h2>Command reference</h2>
+    <table>
+      <thead>
+        <tr><th style="width: 30%;">Command</th><th>What it does</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>pwd</code></td><td>Print working directory.</td></tr>
+        <tr><td><code>ls -l</code></td><td>List files with details (permissions, owner, size, date).</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Worked example</h2>
+<pre><code>$ mkdir -p devops/linux/lab-01
+$ cd devops/linux/lab-01
+$ pwd
+/home/student/devops/linux/lab-01</code></pre>
+
+    <div class="callout">
+      <strong>Note &mdash;</strong> &lt;optional callout for gotchas, warnings, or pro-tips.&gt;
+    </div>
+
+    <h2>Keyboard shortcuts</h2>
+    <p>
+      <span class="kbd">Ctrl</span><span class="kbd-plus">+</span><span class="kbd">A</span> &mdash; beginning of line &middot;
+      <span class="kbd">Ctrl</span><span class="kbd-plus">+</span><span class="kbd">E</span> &mdash; end of line
+    </p>
+
+    <footer class="doc-footer">
+      <span>Course NN &mdash; &lt;Course title&gt;</span>
+      <span><a href="index.html">&#8617; course home</a></span>
+    </footer>
+  </article>
+</body>
+</html>

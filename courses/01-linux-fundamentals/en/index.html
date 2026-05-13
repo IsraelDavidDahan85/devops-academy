@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Course 01 — Linux Fundamentals</title>
+  <link rel="stylesheet" href="../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../index.html">Academy</a>
+    <span class="sep">/</span>
+    <a href="../index.html">Course 01</a>
+    <span class="sep">/</span>
+    <span class="here">English</span>
+    <span class="lang-switch">
+      <a href="index.html" class="active">EN</a>
+      <a href="../he/index.html">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">Course 01 · DevOps Academy</div>
+    <h1>Linux Fundamentals</h1>
+    <p class="lede">The first hands-on course in the program. Students go from "I've never opened a terminal" to "I can stand up, operate, and troubleshoot a Linux box on my own" — covering the shell, shell power-ups, the system underneath, and the daily ops work of running a box.</p>
+
+    <h2>Materials</h2>
+    <div class="linklist">
+      <a class="row" href="syllabus.html">
+        <span class="key">Syllabus</span>
+        <span class="desc">Duration, prerequisites, outcomes, schedule, assessment.</span>
+        <span class="meta">html</span>
+      </a>
+      <a class="row" href="http://localhost:5173/s/linux-fundamentals" target="_blank" rel="noopener">
+        <span class="key">Slides ↗</span>
+        <span class="desc">45-page deck — shell · power-ups · under the hood · operating the system. Requires <code>pnpm dev</code> running.</span>
+        <span class="meta">localhost:5173</span>
+      </a>
+      <a class="row" href="docs/cheat-sheet.html">
+        <span class="key">Cheat sheet</span>
+        <span class="desc">Printable reference covering every command in the deck.</span>
+        <span class="meta">html · print</span>
+      </a>
+      <a class="row" href="docs/guide.html">
+        <span class="key">Guide</span>
+        <span class="desc">Long-form textbook companion — every concept from the deck explained in prose. Part 01 written; later parts scaffolded.</span>
+        <span class="meta">html · read</span>
+      </a>
+    </div>
+
+    <h2>Homework</h2>
+    <div class="linklist">
+      <a class="row" href="homework/lab-01-cli-tour.html">
+        <span class="key">Lab 01 — CLI Tour</span>
+        <span class="desc">Guided shell tour: navigate, create, view, copy, clean up.</span>
+        <span class="meta">~45 min</span>
+      </a>
+      <a class="row" href="homework/lab-02-pipes-and-path.html">
+        <span class="key">Lab 02 — Pipes &amp; PATH</span>
+        <span class="desc">Compose commands with pipes and globs; modify <code>PATH</code>.</span>
+        <span class="meta">~45 min</span>
+      </a>
+      <a class="row" href="homework/lab-03-boot-and-fhs.html">
+        <span class="key">Lab 03 — Boot &amp; FHS</span>
+        <span class="desc">Inspect the boot timeline, list systemd services, walk the FHS.</span>
+        <span class="meta">~60 min</span>
+      </a>
+      <a class="row" href="homework/lab-04-permissions-and-users.html">
+        <span class="key">Lab 04 — Permissions &amp; Users</span>
+        <span class="desc">Create users, set up a shared group with SGID, walk SUID/sticky, run <code>chmod</code> scenarios.</span>
+        <span class="meta">~60 min</span>
+      </a>
+      <a class="row" href="homework/lab-05-storage-and-services.html">
+        <span class="key">Lab 05 — Storage &amp; Services</span>
+        <span class="desc">Build a loopback device, format and mount it, persist via <code>/etc/fstab</code>, write a <code>.service</code> + <code>.timer</code>.</span>
+        <span class="meta">~75 min</span>
+      </a>
+    </div>
+
+    <h2>Final project</h2>
+    <div class="linklist">
+      <a class="row" href="final/project.html">
+        <span class="key">Make a Linux Box Yours</span>
+        <span class="desc">Provision a fresh Linux VM, customize it end-to-end (PS1, aliases, PATH, ~/bin), add a non-root user, mount a volume, deploy a systemd service, document the boot, ship as a Git repo.</span>
+        <span class="meta">3–5 hr</span>
+      </a>
+    </div>
+
+    <h2>Prerequisites</h2>
+    <ul>
+      <li>Course 00 — DevOps Intro (recommended, not strict).</li>
+      <li>A working Linux environment: a VM, WSL2, a cloud VM, or macOS terminal (with caveats — some paths differ).</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>Course 01 — Linux Fundamentals · DevOps Academy</span>
+      <span><a href="../../../index.html">↩ academy home</a></span>
+    </footer>
+  </article>
+</body>
+</html>

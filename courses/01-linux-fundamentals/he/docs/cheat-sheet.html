@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>יסודות לינוקס — דף עזר</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../he/index.html">אקדמיה</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">קורס 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">עברית</a>
+    <span class="sep">/</span>
+    <span class="here">דף עזר</span>
+    <span class="lang-switch">
+      <a href="../../en/docs/cheat-sheet.html">EN</a>
+      <a href="cheat-sheet.html" class="active">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">קורס 01 · DevOps Academy</div>
+    <h1>יסודות לינוקס — דף עזר</h1>
+    <p class="lede">מסמך הפניה אחד המכסה כל פקודה, דגל וקיצור דרך מהקורס — בכל ארבעת חלקיו: ה-shell, שדרוגי shell, מתחת למכסה המנוע, ותפעול המערכת. פתחו בדפדפן, הדפיסו ל-PDF, או השאירו ב-tab פתוח. מספרי השקופיות בסוגריים מצביעים על המקור.</p>
+
+    <h2>ניווט <span class="annotation">(שקופית 5)</span></h2>
+    <table class="dense">
+      <thead><tr><th style="width: 32%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>pwd</code></td><td>הדפסת תיקיית עבודה — איפה אני עכשיו.</td></tr>
+        <tr><td><code>ls</code> · <code>ls -la</code></td><td>רשימת קבצים; <code>-l</code> פורמט ארוך, <code>-a</code> כולל מוסתרים, <code>-h</code> גדלים קריאים.</td></tr>
+        <tr><td><code>cd &lt;path&gt;</code></td><td>שינוי תיקייה. <code>cd ~</code> בית, <code>cd /</code> ראש, <code>cd -</code> תיקייה קודמת.</td></tr>
+        <tr><td><code>pushd</code> / <code>popd</code></td><td>דחיפת התיקייה למחסנית וקפיצה למקום אחר; <code>popd</code> מחזיר.</td></tr>
+        <tr><td><code>realpath &lt;path&gt;</code></td><td>פתרון לנתיב מוחלט (עוקב אחר symlinks).</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>נתיבים —</strong> כל מה שמתחיל ב-<code>/</code> הוא מוחלט. כל השאר הוא יחסי למיקום הנוכחי שלכם.
+    </div>
+
+    <h2>פעולות על קבצים <span class="annotation">(שקופית 6)</span></h2>
+    <table class="dense">
+      <thead><tr><th style="width: 32%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>mkdir -p &lt;path&gt;</code></td><td>יצירת תיקייה; <code>-p</code> יוצר את ההורים ואידמפוטנטי.</td></tr>
+        <tr><td><code>touch &lt;file&gt;</code></td><td>יצירת קובץ ריק (או עדכון חותמת הזמן).</td></tr>
+        <tr><td><code>cp -r &lt;src&gt; &lt;dst&gt;</code></td><td>העתקה. <code>-r</code> רקורסיבי לתיקיות, <code>-p</code> שומר על הרשאות/זמן.</td></tr>
+        <tr><td><code>mv &lt;src&gt; &lt;dst&gt;</code></td><td>העברה או שינוי שם — אותו תחביר לשניהם.</td></tr>
+        <tr><td><code>rm -r &lt;path&gt;</code></td><td>מחיקה. <code>-r</code> רקורסיבי, <code>-i</code> אישור לכל אחד, <code>-f</code> מאלץ.</td></tr>
+        <tr><td><code>ln -s &lt;target&gt; &lt;name&gt;</code></td><td>יצירת symlink.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <strong>סכנה —</strong> <code>rm -rf</code> לא שואל פעמיים. אף פעם אל תשלבו עם נתיבים מוחלטים שלא בדקתם — קודם <code>ls</code>, אחר כך delete.
+    </div>
+
+    <h2>צפייה בקבצים <span class="annotation">(שקופית 8)</span></h2>
+    <table class="dense">
+      <thead><tr><th style="width: 32%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>cat &lt;file&gt;</code></td><td>הדפסת הקובץ כולו ל-stdout.</td></tr>
+        <tr><td><code>less &lt;file&gt;</code></td><td>דפדוף. <code>/pattern</code> חיפוש, <code>n</code>/<code>N</code> הבא/הקודם, <code>q</code> לסיום.</td></tr>
+        <tr><td><code>head -n 20 &lt;file&gt;</code></td><td>20 השורות הראשונות.</td></tr>
+        <tr><td><code>tail -n 20 &lt;file&gt;</code></td><td>20 השורות האחרונות.</td></tr>
+        <tr><td><code>tail -f &lt;file&gt;</code></td><td>מעקב חי אחרי הוספות — הפקודה הקנונית של "צפייה בלוג".</td></tr>
+      </tbody>
+    </table>
+
+    <h2>אנטומיה של <code>ls -l</code> <span class="annotation">(שקופית 9)</span></h2>
+<pre><code>-rw-r--r--  1  student  staff  4096  Jan 12 10:14  README.md
+└──┬───┘   │  └──┬──┘  └─┬─┘  └─┬─┘  └─────┬─────┘  └────┬────┘
+  perms  links  owner  group  size       modified      name
+</code></pre>
+
+    <h3>ביטי הרשאה</h3>
+    <p>10 התווים מתחלקים ל: 1 סוג + 3 בעלים + 3 קבוצה + 3 אחרים.</p>
+    <table class="dense">
+      <thead><tr><th>תו</th><th>פירוש</th></tr></thead>
+      <tbody>
+        <tr><td><code>-</code> · <code>d</code> · <code>l</code></td><td>קובץ רגיל · תיקייה · symlink (מיקום 1)</td></tr>
+        <tr><td><code>r</code></td><td>קריאה</td></tr>
+        <tr><td><code>w</code></td><td>כתיבה</td></tr>
+        <tr><td><code>x</code></td><td>הרצה (או "כניסה" לתיקיות)</td></tr>
+        <tr><td><code>-</code></td><td>הרשאה לא קיימת</td></tr>
+      </tbody>
+    </table>
+
+    <h2>מערכת העזרה <span class="annotation">(שקופית 10)</span></h2>
+    <table class="dense">
+      <thead><tr><th style="width: 32%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>man &lt;cmd&gt;</code></td><td>מדריך מלא. <code>q</code> לסיום. סקציות: 1 פקודות משתמש, 5 פורמטים, 8 ניהול.</td></tr>
+        <tr><td><code>&lt;cmd&gt; --help</code></td><td>הפניה מהירה מובנית.</td></tr>
+        <tr><td><code>whatis &lt;cmd&gt;</code></td><td>תיאור של שורה אחת.</td></tr>
+        <tr><td><code>apropos &lt;topic&gt;</code></td><td>חיפוש במאגר המדריכים — מוצא פקודות קשורות.</td></tr>
+        <tr><td><code>which &lt;cmd&gt;</code></td><td>איפה ב-<code>$PATH</code> הפקודה יושבת.</td></tr>
+        <tr><td><code>type &lt;cmd&gt;</code></td><td>האם זה binary, alias, builtin של shell, או פונקציה?</td></tr>
+      </tbody>
+    </table>
+
+    <h2>היסטוריה ו-aliases <span class="annotation">(שקופית 13)</span></h2>
+    <table class="dense">
+      <thead><tr><th style="width: 32%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>history</code></td><td>מציג פקודות אחרונות עם אינדקסים.</td></tr>
+        <tr><td><code>!!</code></td><td>מריץ מחדש את הפקודה האחרונה.</td></tr>
+        <tr><td><code>!137</code></td><td>מריץ מחדש את פקודה #137 מהיסטוריה.</td></tr>
+        <tr><td><code>!ls</code></td><td>מריץ מחדש את האחרונה שהתחילה ב-<code>ls</code>.</td></tr>
+        <tr><td><code>sudo !!</code></td><td>מריץ מחדש עם sudo (הקלאסי).</td></tr>
+        <tr><td><code>alias ll='ls -lah'</code></td><td>יצירת alias. תייצבו ב-<code>~/.bashrc</code> או <code>~/.zshrc</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>קיצורי מקלדת <span class="annotation">(שקופית 14)</span></h2>
+    <table class="dense">
+      <thead><tr><th style="width: 32%;">קיצור</th><th>פעולה</th></tr></thead>
+      <tbody>
+        <tr><td><span class="kbd">Ctrl</span><span class="kbd-plus">+</span><span class="kbd">A</span></td><td>קפיצה לתחילת השורה.</td></tr>
+        <tr><td><span class="kbd">Ctrl</span><span class="kbd-plus">+</span><span class="kbd">E</span></td><td>קפיצה לסוף השורה.</td></tr>
+        <tr><td><span class="kbd">Ctrl</span><span class="kbd-plus">+</span><span class="kbd">U</span></td><td>מחיקה מהסמן עד התחלה.</td></tr>
+        <tr><td><span class="kbd">Ctrl</span><span class="kbd-plus">+</span><span class="kbd">K</span></td><td>מחיקה מהסמן עד הסוף.</td></tr>
+        <tr><td><span class="kbd">Ctrl</span><span class="kbd-plus">+</span><span class="kbd">W</span></td><td>מחיקת המילה שלפני הסמן.</td></tr>
+        <tr><td><span class="kbd">Ctrl</span><span class="kbd-plus">+</span><span class="kbd">R</span></td><td>חיפוש הפוך בהיסטוריה (אינקרמנטלי).</td></tr>
+        <tr><td><span class="kbd">Ctrl</span><span class="kbd-plus">+</span><span class="kbd">L</span></td><td>ניקוי המסך (כמו <code>clear</code>).</td></tr>
+        <tr><td><span class="kbd">Ctrl</span><span class="kbd-plus">+</span><span class="kbd">C</span></td><td>הפרעה לפקודה הרצה.</td></tr>
+        <tr><td><span class="kbd">Ctrl</span><span class="kbd-plus">+</span><span class="kbd">Z</span></td><td>השעיית הפקודה הרצה. המשך עם <code>fg</code>.</td></tr>
+        <tr><td><span class="kbd">Tab</span></td><td>השלמה אוטומטית. פעמיים — רשימת אפשרויות.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>שליטה ב-jobs <span class="annotation">(שקופית 15)</span></h2>
+    <table class="dense">
+      <thead><tr><th style="width: 32%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>cmd &amp;</code></td><td>הרצה ברקע.</td></tr>
+        <tr><td><code>jobs</code></td><td>רשימת jobs ברקע / מושעים.</td></tr>
+        <tr><td><code>fg %1</code></td><td>החזרת job 1 לחזית.</td></tr>
+        <tr><td><code>bg %1</code></td><td>המשך job 1 שמושעה — ברקע.</td></tr>
+        <tr><td><code>kill %1</code></td><td>שליחת SIGTERM ל-job 1. <code>kill -9</code> ל-SIGKILL (מוצא אחרון).</td></tr>
+        <tr><td><code>nohup cmd &amp;</code></td><td>שורד סגירת shell.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Pipes, הפניות ו-globbing <span class="annotation">(שקופית 16)</span></h2>
+    <div class="twocol">
+      <div>
+        <h3>הפניות</h3>
+        <table class="dense">
+          <tbody>
+            <tr><td><code>cmd &gt; file</code></td><td>stdout → קובץ (דריסה)</td></tr>
+            <tr><td><code>cmd &gt;&gt; file</code></td><td>stdout → קובץ (הוספה)</td></tr>
+            <tr><td><code>cmd 2&gt; file</code></td><td>stderr → קובץ</td></tr>
+            <tr><td><code>cmd &amp;&gt; file</code></td><td>שניהם → קובץ</td></tr>
+            <tr><td><code>cmd &lt; file</code></td><td>קובץ → stdin</td></tr>
+            <tr><td><code>cmd1 | cmd2</code></td><td>pipe של stdout לפקודה הבאה</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>Globbing</h3>
+        <table class="dense">
+          <tbody>
+            <tr><td><code>*</code></td><td>כל רצף של תווים</td></tr>
+            <tr><td><code>?</code></td><td>תו אחד בדיוק</td></tr>
+            <tr><td><code>[abc]</code></td><td>כל אחד מ-a, b, c</td></tr>
+            <tr><td><code>[a-z]</code></td><td>כל תו בטווח</td></tr>
+            <tr><td><code>{a,b,c}</code></td><td>הרחבת brace (ליטרלי)</td></tr>
+            <tr><td><code>**</code></td><td>רקורסיבי (ב-shells תומכים)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h2>ה-<code>$PATH</code> <span class="annotation">(שקופית 18)</span></h2>
+    <p>רשימה מופרדת ב-colons של תיקיות שה-shell מחפש בהן כשמקלידים פקודה. ההתאמה הראשונה זוכה.</p>
+<pre><code>$ echo $PATH
+/usr/local/bin:/usr/bin:/bin:/home/student/bin
+
+$ which ls           # איזה אחד באמת ירוץ
+/usr/bin/ls
+
+# הוספת bin משלכם בהתחלה, ייצוב ב-~/.bashrc:
+export PATH="$HOME/bin:$PATH"
+</code></pre>
+    <div class="callout warn">
+      <strong>בזהירות —</strong> אף פעם אל תמחקו את <code>/usr/bin</code> מ-<code>$PATH</code>. תאבדו גישה ל-<code>ls</code>, <code>cat</code>, <code>rm</code> — ולכלים שתצטרכו כדי לתקן.
+    </div>
+
+    <h2>התאמת ה-prompt (PS1) <span class="annotation">(שקופית 19)</span></h2>
+    <table class="dense">
+      <thead><tr><th style="width: 32%;">קוד</th><th>פירוש</th></tr></thead>
+      <tbody>
+        <tr><td><code>\u</code></td><td>שם משתמש</td></tr>
+        <tr><td><code>\h</code></td><td>hostname (קצר)</td></tr>
+        <tr><td><code>\w</code></td><td>תיקיית עבודה (נתיב מלא)</td></tr>
+        <tr><td><code>\W</code></td><td>תיקיית עבודה (basename בלבד)</td></tr>
+        <tr><td><code>\t</code></td><td>שעה HH:MM:SS</td></tr>
+        <tr><td><code>\$</code></td><td><code>$</code> למשתמש רגיל, <code>#</code> ל-root</td></tr>
+      </tbody>
+    </table>
+<pre><code># prompt קריא והגיוני
+export PS1='\u@\h \w \$ '
+</code></pre>
+
+    <h2><code>sudo</code> ושליטה במערכת <span class="annotation">(שקופיות 24, 26)</span></h2>
+    <table class="dense">
+      <thead><tr><th style="width: 32%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>sudo &lt;cmd&gt;</code></td><td>הרצת cmd כ-root עבור הקריאה הזו בלבד.</td></tr>
+        <tr><td><code>sudo -i</code></td><td>פתיחת shell של root.</td></tr>
+        <tr><td><code>sudo -l</code></td><td>רשימת מה שמותר לכם להריץ.</td></tr>
+        <tr><td><code>visudo</code></td><td>עריכת <code>/etc/sudoers</code> בבטחה (בדיקת תחביר).</td></tr>
+        <tr><td><code>systemctl status &lt;svc&gt;</code></td><td>האם השירות רץ? מה הוא רושם?</td></tr>
+        <tr><td><code>systemctl start | stop | restart &lt;svc&gt;</code></td><td>מחזור חיים של שירות.</td></tr>
+        <tr><td><code>systemctl enable | disable &lt;svc&gt;</code></td><td>הפעלה אוטומטית ב-boot, או לא.</td></tr>
+        <tr><td><code>systemctl list-units --type=service</code></td><td>מה רץ עכשיו.</td></tr>
+        <tr><td><code>systemctl get-default</code></td><td>ברירת המחדל של systemd target.</td></tr>
+        <tr><td><code>journalctl -u &lt;svc&gt; -f</code></td><td>מעקב חי אחרי לוגים של שירות.</td></tr>
+        <tr><td><code>journalctl -b</code></td><td>לוגים מ-boot הנוכחי.</td></tr>
+        <tr><td><code>dmesg</code></td><td>מאגר טבעת של הקרנל — מה הקרנל עצמו רשם.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>סוגי קבצים <span class="annotation">(שקופית 27)</span></h2>
+    <p>התו הראשון ב-<code>ls -l</code> אומר איזה סוג קובץ אתם מסתכלים עליו.</p>
+    <table class="dense">
+      <thead><tr><th style="width: 20%;">סמל</th><th>סוג</th><th>דוגמה</th></tr></thead>
+      <tbody>
+        <tr><td><code>-</code></td><td>קובץ רגיל</td><td><code>/etc/hosts</code></td></tr>
+        <tr><td><code>d</code></td><td>תיקייה</td><td><code>/var/log</code></td></tr>
+        <tr><td><code>l</code></td><td>symlink</td><td><code>/bin → /usr/bin</code></td></tr>
+        <tr><td><code>c</code></td><td>character device</td><td><code>/dev/tty1</code></td></tr>
+        <tr><td><code>b</code></td><td>block device</td><td><code>/dev/sda1</code></td></tr>
+        <tr><td><code>p</code></td><td>named pipe (FIFO)</td><td><code>/run/initctl</code></td></tr>
+        <tr><td><code>s</code></td><td>socket</td><td><code>/var/run/docker.sock</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2>FHS — תיקיות ראשיות <span class="annotation">(שקופית 27)</span></h2>
+    <div class="twocol">
+      <table class="dense">
+        <tbody>
+          <tr><td><code>/bin</code></td><td>פקודות משתמש חיוניות</td></tr>
+          <tr><td><code>/sbin</code></td><td>פקודות מערכת חיוניות</td></tr>
+          <tr><td><code>/etc</code></td><td>תצורת מערכת</td></tr>
+          <tr><td><code>/home</code></td><td>תיקיות בית של משתמשים</td></tr>
+          <tr><td><code>/root</code></td><td>בית של root</td></tr>
+          <tr><td><code>/usr</code></td><td>תוכניות וספריות של משתמש</td></tr>
+        </tbody>
+      </table>
+      <table class="dense">
+        <tbody>
+          <tr><td><code>/var</code></td><td>נתונים משתנים — logs, caches</td></tr>
+          <tr><td><code>/tmp</code></td><td>זמני בלבד</td></tr>
+          <tr><td><code>/proc</code></td><td>תצוגה חיה של הקרנל</td></tr>
+          <tr><td><code>/sys</code></td><td>מידע על הקרנל וההתקנים</td></tr>
+          <tr><td><code>/dev</code></td><td>קבצי התקנים</td></tr>
+          <tr><td><code>/opt</code></td><td>תוכנות צד ג׳ אופציונליות</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout">
+      <strong>מהטרמינל שלכם —</strong> <code>man hier</code> הוא הסיור הקנוני במבנה מערכת הקבצים. קראו פעם אחת.
+    </div>
+
+    <h2>ניהול חבילות <span class="annotation">(שקופיות 30, 31)</span></h2>
+    <div class="twocol">
+      <div>
+        <h3><code>apt</code> + <code>dpkg</code> — Debian / Ubuntu</h3>
+        <table class="dense">
+          <tbody>
+            <tr><td><code>apt update</code></td><td>רענון מפתח החבילות</td></tr>
+            <tr><td><code>apt install &lt;p&gt;</code></td><td>התקנה + תלויות</td></tr>
+            <tr><td><code>apt upgrade</code></td><td>עדכון כל מה שיש לו עדכון</td></tr>
+            <tr><td><code>apt remove / purge &lt;p&gt;</code></td><td>הסרה (משאיר configs) / + configs</td></tr>
+            <tr><td><code>apt search &lt;q&gt;</code> · <code>apt show &lt;p&gt;</code></td><td>חיפוש / פרטים</td></tr>
+            <tr><td><code>dpkg -i &lt;file.deb&gt;</code></td><td>התקנת .deb מקומי (low-level)</td></tr>
+            <tr><td><code>dpkg -l</code> · <code>dpkg -L &lt;p&gt;</code></td><td>רשימת מותקנים / קבצים בחבילה</td></tr>
+            <tr><td><code>dpkg -S &lt;file&gt;</code></td><td>איזו חבילה מחזיקה בקובץ</td></tr>
+            <tr><td><code>dpkg --configure -a</code></td><td>שחזור מהתקנה שנקטעה</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3><code>dnf</code> + <code>rpm</code> — RHEL / Fedora</h3>
+        <table class="dense">
+          <tbody>
+            <tr><td><code>dnf check-update</code></td><td>אילו עדכונים ממתינים</td></tr>
+            <tr><td><code>dnf install &lt;p&gt;</code></td><td>התקנה + תלויות</td></tr>
+            <tr><td><code>dnf upgrade</code></td><td>עדכון הכל</td></tr>
+            <tr><td><code>dnf remove &lt;p&gt;</code> · <code>dnf autoremove</code></td><td>הסרה / זריקת תלויות יתומות</td></tr>
+            <tr><td><code>dnf search &lt;q&gt;</code> · <code>dnf info &lt;p&gt;</code></td><td>חיפוש / פרטים</td></tr>
+            <tr><td><code>rpm -ivh &lt;file.rpm&gt;</code></td><td>התקנת .rpm מקומי (low-level)</td></tr>
+            <tr><td><code>rpm -qa</code> · <code>rpm -ql &lt;p&gt;</code></td><td>רשימת מותקנים / קבצים בחבילה</td></tr>
+            <tr><td><code>rpm -qf &lt;file&gt;</code></td><td>איזו חבילה מחזיקה בקובץ</td></tr>
+            <tr><td><code>rpm -qi &lt;p&gt;</code></td><td>מידע על חבילה</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>חוצה הפצות —</strong> <code>snap</code>, <code>flatpak</code> ו-<code>brew</code> עובדים בכל מקום. פנו אליהם כשמנהל החבילות של ההפצה לא מספק.
+    </div>
+
+    <h2>ניהול repos <span class="annotation">(שקופית 32)</span></h2>
+    <div class="twocol">
+      <div>
+        <h3><code>apt</code> repos</h3>
+        <table class="dense">
+          <tbody>
+            <tr><td><code>/etc/apt/sources.list</code></td><td>הרשימה הראשית — ברירות מחדל של ההפצה</td></tr>
+            <tr><td><code>/etc/apt/sources.list.d/*.list</code></td><td>קבצי drop-in ל-repos נוספים</td></tr>
+            <tr><td><code>add-apt-repository ppa:&lt;o&gt;/&lt;p&gt;</code></td><td>הוספת PPA של Launchpad (Ubuntu)</td></tr>
+            <tr><td><code>/etc/apt/keyrings/*.gpg</code></td><td>מפתחות חתימה ל-repos חדשים</td></tr>
+            <tr><td><code>apt policy &lt;pkg&gt;</code></td><td>מאיזה repo הגיעה החבילה</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3><code>dnf</code> repos</h3>
+        <table class="dense">
+          <tbody>
+            <tr><td><code>/etc/yum.repos.d/*.repo</code></td><td>קובץ אחד לכל מקור</td></tr>
+            <tr><td><code>dnf repolist</code> · <code>--all</code></td><td>רשימת repos מופעלים (או הכל)</td></tr>
+            <tr><td><code>dnf config-manager --add-repo &lt;url&gt;</code></td><td>הוספת .repo חדש מ-URL</td></tr>
+            <tr><td><code>dnf config-manager --enable / --disable &lt;id&gt;</code></td><td>הפעלה / השבתה</td></tr>
+            <tr><td><code>rpm --import &lt;key-url&gt;</code></td><td>נתינת אמון במפתח GPG</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="callout warn">
+      <strong>שרשרת אספקה —</strong> אמתו טביעות אצבע של GPG לפני שאתם נותנים אמון ב-repo של צד שלישי.
+    </div>
+
+    <h2>הישרדות ב-<code>vi</code> <span class="annotation">(שקופית 33)</span></h2>
+    <div class="twocol">
+      <div>
+        <h3>Modes</h3>
+        <table class="dense">
+          <tbody>
+            <tr><td><span class="kbd">i</span></td><td>מצב Insert — הקלידו טקסט</td></tr>
+            <tr><td><span class="kbd">Esc</span></td><td>חזרה ל-Normal</td></tr>
+            <tr><td><span class="kbd">:</span></td><td>מצב Ex-command</td></tr>
+            <tr><td><span class="kbd">v</span></td><td>Visual — סימון לפני עריכה</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>הקשות שמצילות את היום</h3>
+        <table class="dense">
+          <tbody>
+            <tr><td><code>:w</code> · <code>:q</code> · <code>:wq</code> · <code>:q!</code></td><td>שמירה / יציאה / שמירה+יציאה / יציאה ללא שמירה</td></tr>
+            <tr><td><code>/pattern</code> · <code>n</code> · <code>N</code></td><td>חיפוש קדימה; הבא / קודם</td></tr>
+            <tr><td><code>dd</code> · <code>yy</code> · <code>p</code></td><td>מחיקה / yank / paste של שורה</td></tr>
+            <tr><td><code>u</code> · <span class="kbd">Ctrl</span><span class="kbd-plus">+</span><span class="kbd">R</span></td><td>בטל / החזר</td></tr>
+            <tr><td><code>gg</code> · <code>G</code></td><td>ראש הקובץ / סוף הקובץ</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="callout">
+      <strong>תקועים? —</strong> <span class="kbd">Esc</span> · <span class="kbd">Esc</span> · <code>:q!</code> מחלץ אתכם מכל מצב בלי לשמור.
+    </div>
+
+    <h2>הרשאות ובעלות <span class="annotation">(שקופית 34)</span></h2>
+    <p>תשעת תווי ההרשאות מתחלקים לשלוש שלישיות: <strong>owner / group / other</strong>. כל אחד הוא <code>r</code> read = 4, <code>w</code> write = 2, <code>x</code> execute = 1. סכמו לערך אוקטלי.</p>
+    <table class="dense">
+      <thead><tr><th style="width: 32%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>chmod 755 &lt;f&gt;</code></td><td>rwxr-xr-x — לבעלים הכל, לאחרים r+x (ברירת מחדל לקבצי הרצה ותיקיות)</td></tr>
+        <tr><td><code>chmod 644 &lt;f&gt;</code></td><td>rw-r--r-- (ברירת מחדל לקבצים)</td></tr>
+        <tr><td><code>chmod u+x &lt;f&gt;</code></td><td>הוספת הרשאת execute לבעלים (סימבולי)</td></tr>
+        <tr><td><code>chmod -R 644 &lt;dir&gt;</code></td><td>רקורסיבי — כל קובץ בפנים</td></tr>
+        <tr><td><code>chown &lt;u&gt; &lt;f&gt;</code></td><td>שינוי בעלים</td></tr>
+        <tr><td><code>chown &lt;u&gt;:&lt;g&gt; &lt;f&gt;</code></td><td>שינוי בעלים וקבוצה יחד</td></tr>
+        <tr><td><code>chgrp &lt;g&gt; &lt;f&gt;</code></td><td>שינוי קבוצה בלבד</td></tr>
+        <tr><td><code>stat &lt;f&gt;</code></td><td>מטא-דאטה מלאה — mode באוקטלי ובסימבולי</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Bits מיוחדים <span class="annotation">(שקופית 35)</span></h2>
+    <table class="dense">
+      <thead><tr><th style="width: 14%;">Bit</th><th style="width: 14%;">אוקטלי</th><th>מה הוא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><strong>SUID</strong></td><td>4xxx</td><td>הרצה כ-<em>בעלים</em> של הקובץ (למשל <code>/usr/bin/passwd</code> רץ כ-root)</td></tr>
+        <tr><td><strong>SGID</strong></td><td>2xxx</td><td>הרצה כ-<em>קבוצה</em> של הקובץ; בתיקייה — קבצים חדשים יורשים את הקבוצה</td></tr>
+        <tr><td><strong>sticky</strong></td><td>1xxx</td><td>בתיקייה — רק בעלי הקובץ יכול למחוק אותו (למשל <code>/tmp</code> במצב 1777)</td></tr>
+        <tr><td><code>umask 022</code></td><td>—</td><td>מסנן ברירת מחדל — קבצים → 644, תיקיות → 755 (חיסור umask מ-666 / 777)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>משתמשים וקבוצות <span class="annotation">(שקופית 36)</span></h2>
+    <table class="dense">
+      <thead><tr><th style="width: 38%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>useradd -m &lt;u&gt;</code></td><td>יצירת משתמש עם תיקיית בית</td></tr>
+        <tr><td><code>passwd &lt;u&gt;</code></td><td>הגדרה / איפוס סיסמה</td></tr>
+        <tr><td><code>usermod -aG &lt;g&gt; &lt;u&gt;</code></td><td>הוספת משתמש לקבוצה (<code>-a</code> = append — חשוב!)</td></tr>
+        <tr><td><code>userdel -r &lt;u&gt;</code></td><td>הסרת משתמש ותיקיית הבית שלו</td></tr>
+        <tr><td><code>groupadd &lt;g&gt;</code></td><td>יצירת קבוצה חדשה</td></tr>
+        <tr><td><code>id &lt;u&gt;</code></td><td>הצגת uid, gid, חברויות בקבוצות</td></tr>
+        <tr><td><code>su - &lt;u&gt;</code></td><td>הפיכה למשתמש (login shell עם <code>-</code>)</td></tr>
+        <tr><td><code>getent passwd &lt;u&gt;</code></td><td>שאילתת מסד משתמשים (גם LDAP / AD)</td></tr>
+        <tr><td><code>/etc/passwd</code></td><td><code>name:x:uid:gid:gecos:home:shell</code></td></tr>
+        <tr><td><code>/etc/shadow</code></td><td>סיסמאות מוצפנות (קריא רק ל-root)</td></tr>
+        <tr><td><code>/etc/group</code></td><td>הגדרות קבוצות וחברים</td></tr>
+      </tbody>
+    </table>
+
+    <h2>תהליכים ומשאבים <span class="annotation">(שקופית 37)</span></h2>
+    <table class="dense">
+      <thead><tr><th style="width: 38%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>top</code> · <code>htop</code></td><td>תצוגת תהליכים חיה; <code>htop</code> יפה יותר</td></tr>
+        <tr><td><code>ps aux</code> · <code>ps -ef</code></td><td>תמונת מצב מלאה של כל תהליך</td></tr>
+        <tr><td><code>ps --forest</code></td><td>עץ תהליכים — מי הוליד את מי</td></tr>
+        <tr><td><code>free -h</code></td><td>זיכרון — free / used / cached, יחידות קריאות</td></tr>
+        <tr><td><code>df -h</code></td><td>שימוש בדיסק לפי mount point</td></tr>
+        <tr><td><code>du -sh ./*</code></td><td>שימוש בדיסק לפי תיקייה (מסוכם, קריא)</td></tr>
+        <tr><td><code>kill &lt;pid&gt;</code></td><td>שליחת SIGTERM — עצירה נקייה</td></tr>
+        <tr><td><code>kill -9 &lt;pid&gt;</code></td><td>SIGKILL — מוצא אחרון</td></tr>
+        <tr><td><code>kill -HUP &lt;pid&gt;</code></td><td>טעינה מחדש של config (הרבה daemons)</td></tr>
+        <tr><td><code>/proc/&lt;pid&gt;/{exe,cmdline,fd}</code></td><td>תצוגת קרנל לכל תהליך</td></tr>
+      </tbody>
+    </table>
+
+    <h2>ארכיונים ודחיסה <span class="annotation">(שקופית 38)</span></h2>
+    <p><code>tar</code> אורז קבצים; <code>gzip</code> / <code>zstd</code> דוחס. הם משלימים — <code>.tar.gz</code> הוא tarball שעבר gzip.</p>
+    <table class="dense">
+      <thead><tr><th style="width: 38%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>tar -czf out.tar.gz &lt;dir&gt;</code></td><td>יצירת tarball דחוס ב-gzip</td></tr>
+        <tr><td><code>tar -xzf out.tar.gz</code></td><td>חילוץ כאן</td></tr>
+        <tr><td><code>tar -xzf f.tgz -C /opt</code></td><td>חילוץ לתיקייה אחרת</td></tr>
+        <tr><td><code>tar -tzf out.tar.gz</code></td><td>הצגת תוכן</td></tr>
+        <tr><td><code>gzip</code> / <code>gunzip &lt;f&gt;</code></td><td>דחיסה / פתיחת קובץ יחיד</td></tr>
+        <tr><td><code>zstd</code> / <code>unzstd &lt;f&gt;</code></td><td>מודרני, מהיר יותר, יחס דחיסה טוב יותר</td></tr>
+        <tr><td><code>zip</code> / <code>unzip &lt;f&gt;</code></td><td>תאימות עם Windows / macOS</td></tr>
+      </tbody>
+    </table>
+    <p><strong>מילון דגלים של tar:</strong> <code>c</code> create · <code>x</code> extract · <code>t</code> list · <code>z</code> gzip · <code>j</code> bzip2 · <code>J</code> xz · <code>f</code> file · <code>v</code> verbose.</p>
+
+    <h2>Cron ו-timers של systemd <span class="annotation">(שקופית 39)</span></h2>
+    <div class="twocol">
+      <div>
+        <h3>cron</h3>
+        <table class="dense">
+          <tbody>
+            <tr><td><code>crontab -e</code> · <code>-l</code></td><td>עריכה / רשימת ה-crontab שלכם</td></tr>
+            <tr><td><code>/etc/cron.d/*</code></td><td>משימות מערכת (root) — drop קבצים כאן</td></tr>
+            <tr><td><code>0 2 * * * cmd</code></td><td>min hr dom mon dow → פקודה</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>systemd timers</h3>
+        <table class="dense">
+          <tbody>
+            <tr><td><code>systemctl list-timers</code></td><td>כל ה-timers הפעילים ומתי הם פועלים</td></tr>
+            <tr><td><code>systemctl enable --now &lt;t&gt;</code></td><td>הפעלה עכשיו + בכל boot</td></tr>
+            <tr><td><code>journalctl -u &lt;svc&gt;</code></td><td>לוגים מהשירות שהופעל</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h2>אחסון ומערכות קבצים <span class="annotation">(שקופית 40)</span></h2>
+    <p>ארבע שכבות זו על זו: <strong>block device → partition → filesystem → mount point</strong>.</p>
+    <table class="dense">
+      <thead><tr><th style="width: 38%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>lsblk</code></td><td>רשימת block devices ו-partitions</td></tr>
+        <tr><td><code>findmnt</code> · <code>mount</code></td><td>מה ממואנט כרגע</td></tr>
+        <tr><td><code>mkfs.ext4 &lt;dev&gt;</code></td><td>פורמט של partition (גם <code>mkfs.xfs</code>, <code>mkfs.btrfs</code>)</td></tr>
+        <tr><td><code>mount &lt;dev&gt; &lt;mp&gt;</code> · <code>umount &lt;mp&gt;</code></td><td>mount / unmount</td></tr>
+        <tr><td><code>/etc/fstab</code></td><td>mounts שנעשים אוטומטית ב-boot</td></tr>
+        <tr><td><code>swapon</code> · <code>swapoff</code></td><td>הפעלה / השבתה של swap</td></tr>
+        <tr><td><code>blkid</code></td><td>הצגת UUIDs וסוגי filesystem</td></tr>
+      </tbody>
+    </table>
+
+    <h2>LVM <span class="annotation">(שקופית 41)</span></h2>
+    <p>איגוד דיסקים (<strong>PV</strong>) לקבוצה (<strong>VG</strong>), וחיתוך לנפחים לוגיים (<strong>LV</strong>) שניתנים לגדילה ו-snapshot.</p>
+    <table class="dense">
+      <thead><tr><th style="width: 42%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>pvcreate /dev/sdb</code></td><td>סימון דיסק כ-Physical Volume</td></tr>
+        <tr><td><code>vgcreate vg0 /dev/sdb</code></td><td>יצירת Volume Group מ-PVs</td></tr>
+        <tr><td><code>lvcreate -L 20G -n data vg0</code></td><td>חיתוך LV של 20 GB</td></tr>
+        <tr><td><code>lvextend -L +10G &lt;lv&gt;</code></td><td>הגדלת ה-LV ב-10 GB</td></tr>
+        <tr><td><code>resize2fs &lt;lv&gt;</code></td><td>הגדלת ה-filesystem בהתאם</td></tr>
+        <tr><td><code>pvs</code> · <code>vgs</code> · <code>lvs</code></td><td>בדיקת כל שכבה</td></tr>
+        <tr><td><code>lvcreate -s -L 5G -n bkp vg0/data</code></td><td>snapshot — עותק נקודת זמן</td></tr>
+      </tbody>
+    </table>
+
+    <h2>לוגים <span class="annotation">(שקופית 42)</span></h2>
+    <div class="twocol">
+      <div>
+        <h3>/var/log (קבצי טקסט)</h3>
+        <table class="dense">
+          <tbody>
+            <tr><td><code>/var/log/syslog</code></td><td>אירועי מערכת כלליים (Debian)</td></tr>
+            <tr><td><code>/var/log/messages</code></td><td>אותו רעיון (RHEL)</td></tr>
+            <tr><td><code>/var/log/auth.log</code> · <code>secure</code></td><td>ניסיונות login + sudo</td></tr>
+            <tr><td><code>/etc/logrotate.d/*</code></td><td>כללי rotation — מונע התמלאות דיסקים</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>journalctl (יומן systemd)</h3>
+        <table class="dense">
+          <tbody>
+            <tr><td><code>journalctl -xe</code></td><td>אירועים אחרונים עם הקשר נוסף</td></tr>
+            <tr><td><code>journalctl -u &lt;svc&gt; -f</code></td><td>מעקב חי אחר שירות יחיד</td></tr>
+            <tr><td><code>journalctl --since "10m"</code></td><td>חלון זמן (גם <code>--until</code>)</td></tr>
+            <tr><td><code>journalctl -p err -b</code></td><td>שגיאות בלבד, מאז ה-boot הזה</td></tr>
+            <tr><td><code>journalctl --disk-usage</code></td><td>כמה דיסק היומן צורך</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h2>כתיבת שירות systemd משלכם <span class="annotation">(שקופית 43)</span></h2>
+    <p>קובץ <code>.service</code> מסביר ל-systemd איך להריץ את התוכנית שלכם. שמרו תחת <code>/etc/systemd/system/</code> וטענו מחדש.</p>
+<pre><code># /etc/systemd/system/backup.service
+[Unit]
+Description=Nightly backup
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/backup.sh
+User=backup
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+</code></pre>
+    <table class="dense">
+      <thead><tr><th style="width: 38%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>systemctl daemon-reload</code></td><td>טעינה מחדש לאחר עריכת unit</td></tr>
+        <tr><td><code>systemctl enable &lt;svc&gt;</code></td><td>הפעלה אוטומטית ב-boot</td></tr>
+        <tr><td><code>systemctl start &lt;svc&gt;</code></td><td>הפעלה עכשיו</td></tr>
+        <tr><td><code>systemctl status &lt;svc&gt;</code></td><td>האם הוא תקין? מה הוא הוציא לאחרונה?</td></tr>
+        <tr><td><code>journalctl -u &lt;svc&gt; -f</code></td><td>מעקב אחר הלוגים שלו</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      <strong>שילוב עם timer —</strong> קובץ <code>backup.timer</code> (אותו שם, סיומת <code>.timer</code>) יריץ את השירות לפי לוח זמנים. ראו <code>man systemd.timer</code>.
+    </div>
+
+    <h2>רשתות — ערכת הישרדות <span class="annotation">(שקופית 44)</span></h2>
+    <p>קורס 04 מכסה רשתות מקצה לקצה. עד אז, השש האלה יוציאו אתכם מתקיעות.</p>
+    <table class="dense">
+      <thead><tr><th style="width: 32%;">פקודה</th><th>מה היא עושה</th></tr></thead>
+      <tbody>
+        <tr><td><code>ip addr</code> · <code>ip a</code></td><td>הצגת ממשקים וכתובות IP</td></tr>
+        <tr><td><code>ip route</code></td><td>טבלת ניתוב — לאן חבילות הולכות</td></tr>
+        <tr><td><code>ping &lt;host&gt;</code></td><td>בדיקת השגה בסיסית</td></tr>
+        <tr><td><code>ss -tlnp</code></td><td>sockets פעילים של TCP (port → pid)</td></tr>
+        <tr><td><code>curl &lt;url&gt;</code></td><td>שליפת URL — עובד גם על APIs</td></tr>
+        <tr><td><code>dig &lt;host&gt;</code></td><td>שאילתת DNS</td></tr>
+      </tbody>
+    </table>
+
+    <footer class="doc-footer">
+      <span>קורס 01 — יסודות לינוקס · דף עזר</span>
+      <span><a href="../index.html">↩ דף הקורס</a></span>
+    </footer>
+  </article>
+</body>
+</html>

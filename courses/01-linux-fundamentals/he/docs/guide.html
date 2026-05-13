@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>יסודות לינוקס — מדריך</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../he/index.html">אקדמיה</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">קורס 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">עברית</a>
+    <span class="sep">/</span>
+    <span class="here">מדריך</span>
+    <span class="lang-switch">
+      <a href="../../en/docs/guide.html">EN</a>
+      <a href="guide.html" class="active">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">קורס 01 · DevOps Academy</div>
+    <h1>יסודות לינוקס — מדריך</h1>
+    <p class="lede">מסמך מלווה ארוך למצגת. בעוד המצגות מציגות את התמונה ודף העזר משמש כהפניה מהירה, המסמך הזה מסביר כל מושג בפרוזה — את ה<em>למה</em> וה<em>מתי</em>, לא רק את ה<em>מה</em>. קראו אותו ברצף בפעם הראשונה; חזרו לסעיפים ספציפיים אחרי כל מעבדה.</p>
+
+    <div class="callout">
+      <strong>איך זה מאורגן —</strong> הסעיפים תואמים את המצגת אחד-לאחד. כל חלק במצגת הוא חלק במדריך הזה; כל <em>סעיף</em> בתוך חלק מתאים לעמוד אחד במצגת (או לאשכול קטן של עמודים קרובים). מספרי השקופיות מצוינים בסוגריים.
+    </div>
+
+    <h2>למה לינוקס <span class="annotation">(שקופית 2)</span></h2>
+    <p>לינוקס מריץ את התשתית של העולם המודרני. כל ספק ענן מרכזי, רוב מוחלט של שרתי האינטרנט, כל CI runner, כל מכשיר Android, כל Raspberry Pi — הכל לינוקס. כמהנדס/ת DevOps תבלו יותר שעות מול טרמינל לינוקס מאשר מול כל ממשק אחר בקריירה.</p>
+    <p>החדשות הטובות: אם אתם מסוגלים לנווט במכונת לינוקס אחת, אתם מסוגלים לנווט בכולן. המוסכמות יציבות באופן מרשים. אותם <code>cd</code>, <code>ls</code> ו-<code>cat</code> עובדים על מכונה זעירה ועל מכונת GPU ענן ב-50 אלף דולר. ה-shell שתלמדו השבוע הוא ה-shell שתשתמשו בו בעוד עשור. שעת הסבל הראשונה משתלמת לעשר השנים הבאות.</p>
+    <p>אתם לא צריכים לזכור הכל. אתם צריכים לזהות קטגוריות — "זה משהו של תהליכים", "זה משהו של מערכת קבצים", "זה משהו של רשת" — ולדעת לאיזו משפחת פקודות לפנות. השאר זה <code>man</code>.</p>
+
+    <h2>היסטוריה קצרה <span class="annotation">(שקופית 3)</span></h2>
+    <p>לינוקס לא הופיע מהאוויר. ב-1969 קן תומפסון ודניס ריצ'י בנו את <strong>Unix</strong> ב-Bell Labs — מערכת הפעלה קטנה וקומפוזביליות, שמאורגנת סביב רעיון אחד: <em>כלים קטנים שעושים דבר אחד היטב, מחוברים ב-pipes</em>. הפילוסופיה הזו היא הסיבה ש-<code>grep | sort | uniq | head</code> עדיין עובד חמישים שנה אחרי. ה-pipes שרדו את הדיסקו.</p>
+    <p>ב-1991, לינוס טורבלדס פרסם בקבוצת הדיון <code>comp.os.minix</code> ("אני בונה מערכת הפעלה (חינמית) — סתם תחביב, לא תהיה גדולה ומקצועית כמו GNU"). הוא טעה לגבי הסקייל; היא בלעה את העולם. השילוב של הקרנל של לינוס וכלי מרחב המשתמש של פרויקט GNU הפך ל-<strong>GNU/Linux</strong> — שם המוכר בקיצור "לינוקס" — ושינה את מודל הקוד הפתוח מסקרנות לסטנדרט תעשייתי.</p>
+    <p>Git הגיע ב-2005 — גם הוא מלינוס, נבנה כדי לנהל את עץ המקור של לינוקס. Docker ב-2013 עטף את namespaces ו-cgroups של לינוקס בקונטיינרים ידידותיים למפתח. כל פעם שאתם מקלידים <code>kubectl apply</code>, אתם עומדים על השושלת הזו.</p>
+
+    <h2 id="part-01">חלק 01 — ה-Shell <span class="annotation">(שקופית 4)</span></h2>
+    <p>ה-shell הוא איך שמדברים ללינוקס. זה תוכנית שקוראת את מה שאתם מקלידים, מריצה אותו, ומציגה את הפלט — לולאה שתבלו בתוכה אלפי שעות. Shells מודרניים (bash, zsh) הם גם שפות תכנות קטנות, אבל לסעיפים הבאים נתייחס ל-shell ככלי: מקליד, מציג רשימה, מנווט, שואל לעזרה. תכונות מתקדמות יגיעו בחלק 02.</p>
+
+    <h3 id="first-commands">הפקודות הראשונות שלכם <span class="annotation">(שקופית 5)</span></h3>
+    <p>כל סשן shell מתחיל בשאלה — "איפה אני?" — שעליה <code>pwd</code> ("print working directory") עונה. ברגע שאתם יודעים איפה אתם, <code>ls</code> מציג מה יש כאן, ו-<code>cd &lt;path&gt;</code> מעביר אתכם. שלוש פקודות קונות לכם את כל מערכת הקבצים.</p>
+<pre><code>$ pwd
+/home/student
+
+$ ls
+Documents  Downloads  notes.md  projects
+
+$ cd projects &amp;&amp; pwd
+/home/student/projects</code></pre>
+    <p>כמה קיצורים שווה לצרוב מיד: <code>cd ~</code> לוקח אתכם הביתה, <code>cd /</code> לראש מערכת הקבצים, ו-<code>cd -</code> חוזר לתיקייה הקודמת (מצוין לקפיצה הלוך-וחזור בין שני מקומות).</p>
+    <p><strong>נתיבים חשובים.</strong> נתיב שמתחיל ב-<code>/</code> הוא <em>מוחלט</em> — הוא תמיד מתייחס לאותו דבר ללא קשר למיקום שלכם. כל דבר אחר <em>יחסי</em> למיקום הנוכחי. <code>./foo</code> פירושו "foo בתיקייה הנוכחית", <code>../foo</code> פירושו "foo רמה אחת למעלה", ו-<code>foo</code> בלבד פירושו בדרך כלל אותו דבר כמו <code>./foo</code>.</p>
+
+    <h3 id="file-ops">ליצור, להעביר, להסיר <span class="annotation">(שקופית 6)</span></h3>
+    <p>הפעולות הבסיסיות על קבצים הן חמישה פעלים שתשתמשו בהם יום-יום: <code>mkdir</code>, <code>touch</code>, <code>cp</code>, <code>mv</code>, <code>rm</code>. הדגלים חשובים כמו הפעלים.</p>
+<pre><code>mkdir -p devops/linux/lab-01   # יצירת נתיב, כולל תיקיות הורה
+touch notes.md                  # קובץ ריק, או עדכון של mtime
+cp -r src/ backup/              # העתקת תיקייה (-r רקורסיבי)
+cp -p config.toml /etc/         # העתקה + שמירת mode ו-timestamps
+ln -s /opt/myapp/current latest # יצירת symlink בשם "latest"
+mv old.md new.md                # שינוי שם
+mv *.log archive/               # העברת קבצים רבים בבת אחת
+rm -r old/                      # מחיקה רקורסיבית
+rm -rf old/                     # …כפויה, בלי שאלות. מסוכן.</code></pre>
+    <p>ה-<code>-r</code> של <code>cp</code> הוא הראשון שכדאי להפנים — בלעדיו, העתקת תיקייה נכשלת. <code>cp -p</code> מיועד למקרה שאתם באמת מעוניינים לשמר timestamps והרשאות (סקריפטי deployment מעוניינים). <code>ln -s</code> יוצר <em>symlink</em>: מצביע לנתיב אחר. Symlinks נמצאים בכל מקום במערכת לינוקס אמיתית — חצי מ-<code>/usr/bin</code> הם symlinks ל-alternates.</p>
+    <div class="callout warn">
+      <strong>החטא הקרדינלי.</strong> <code>rm -rf</code> לא שואל פעמיים. לפני שאתם לוחצים Enter על פקודת <code>rm</code> שמשתמשת במשתנה (<code>$DIR</code>) או ב-glob (<code>*</code>), הריצו <code>ls</code> על אותו נתיב קודם. מספר הקריירות שכמעט הסתיימו ב-<code>rm -rf "$BASE/$SUB"</code> כש-<code>$BASE</code> התברר ריק — בלתי נספר.
+    </div>
+
+    <h3 id="find">ציד עם <code>find</code> <span class="annotation">(שקופית 7)</span></h3>
+    <p>בעוד <code>ls</code> רק מציג מה יש בתיקייה הנוכחית, <code>find</code> צועד על העץ כולו ומסנן תוך כדי הליכה. זה הכלי הנכון בכל פעם שאתם צריכים לשאול את מערכת הקבצים שאלה מעניינת יותר מ"מה כאן?"</p>
+<pre><code>find . -name "*.log"            # כל קובץ .log תחת התיקייה הנוכחית
+find /home -type f -size +100M  # קבצים רגילים שגדולים מ-100 MB
+find /etc -name "*.conf" -mtime -7   # קבצי conf ששונו בשבוע האחרון
+find . -name "*.tmp" -delete    # …או -exec rm {} \; לפעולות כלליות יותר</code></pre>
+    <p>סדר הארגומנטים חשוב: קודם ה-<em>איפה</em> (נתיב), אז שרשרת של <em>מסננים</em> (<code>-type</code>, <code>-name</code>, <code>-size</code>, <code>-mtime</code>), ואז באופן אופציונלי <em>פעולה</em> (<code>-delete</code>, <code>-exec</code>). תמיד שימו במרכאות תבניות עם מטא-תווים של shell — בלי מרכאות, ה-shell יפרוס את <code>*.log</code> לפני ש-<code>find</code> יראה אותו, מה שכמעט אף פעם לא מה שרציתם.</p>
+    <p><code>find</code> רקורסיבי כברירת מחדל. כדי להגביל עומק, הוסיפו <code>-maxdepth 1</code>. בשילוב עם <code>-exec</code>, הוא הופך לפטיש האוניברסלי של "תעשה X על כל התאמה".</p>
+
+    <h3 id="viewing">ארבע דרכים לקרוא קובץ <span class="annotation">(שקופית 8)</span></h3>
+    <p>קריאת קובץ נשמעת פשוטה — אבל הכלי הנכון תלוי בגודל הקובץ ומה אתם רוצים לעשות איתו.</p>
+<pre><code>cat short.txt              # זריקה של כל הקובץ ל-stdout
+less /var/log/syslog       # דפדוף; / חיפוש, n/N הבא/קודם, q יציאה
+head -n 20 big.log         # 20 השורות הראשונות
+tail -n 50 big.log         # 50 השורות האחרונות
+tail -f /var/log/nginx/access.log   # מעקב חי אחר תוספות חדשות</code></pre>
+    <p><code>cat</code> מיועד לקבצים קטנים — זריקת לוג של 10 GB לטרמינל שלכם תכאב. <code>less</code> הוא ברירת המחדל הבטוחה לגדלים לא ידועים: הוא טוען עמוד בכל פעם ותומך בחיפוש. <code>head</code> ו-<code>tail</code> מיועדים לקצה אחד של הקובץ; <code>tail -f</code> זה אחד שתזכרו בלי לנסות — הוא עוקב אחרי קובץ תוך שורות חדשות נכתבות אליו, הפקודה הקנונית של "מעקב אחר לוג". בשילוב עם restart של שירות בחלון אחר, <code>tail -f</code> הוא חצי מהדיבוג.</p>
+
+    <h3 id="ls-anatomy">קריאת <code>ls -l</code> <span class="annotation">(שקופית 9)</span></h3>
+    <p>הפלט של <code>ls -l</code> נראה דחוס אבל מקודד שבעה פיסות מידע שונות לכל קובץ. ברגע שאתם יודעים לקרוא אותו, אתם יודעים לקרוא כל מערכת Unix על פני כדור הארץ.</p>
+<pre><code>-rw-r--r--  1  student  staff  4096  Jan 12 10:14  README.md
+└──┬───┘    │  └──┬──┘  └─┬─┘  └─┬─┘  └─────┬─────┘  └────┬────┘
+  perms   links  owner  group  size       modified      name</code></pre>
+    <p>עשרת התווים השמאליים מתפרקים ל-<em>1 type + 3 owner + 3 group + 3 other</em>. תו ה-type אומר לכם אם זה קובץ רגיל (<code>-</code>), תיקייה (<code>d</code>), symlink (<code>l</code>), או משהו אקזוטי יותר (נפגוש את האחרים בחלק 03). שלוש שלישיות ההרשאות כל אחת מציגה <code>r</code>ead, <code>w</code>rite ו-e<code>x</code>ecute — או <code>-</code> אם חסר.</p>
+    <p>דגלים מתחברים: <code>ls -lah</code> = long, hidden, גדלים קריאים. <code>ls -ltSr</code> = long, ממוין לפי זמן, אז לפי גודל, הפוך. גלוסר הדגלים המלא נמצא בדף העזר; ההרגל של <em>שילוב</em> הוא הדבר להפנים.</p>
+
+    <h3 id="help-system">מערכת העזרה <span class="annotation">(שקופית 10)</span></h3>
+    <p>ל-shell יש תשובות מובנות. לפני שאתם פונים למנוע חיפוש, פנו לאלה:</p>
+<pre><code>man cp              # דף ה-manual המלא — דגלים, דוגמאות, see-also
+man 5 passwd        # section 5 = file formats; 1 = commands; 8 = admin
+man hier            # סיור קנוני במבנה מערכת הקבצים
+cp --help           # כרטיס הפניה מהיר שמובנה ברוב הפקודות
+whatis ls           # תיאור בשורה אחת
+apropos compress    # חיפוש במסד ה-manual לפי נושא
+which python3       # איזה executable רץ כשמקלידים את השם
+type ll             # binary, alias, function או builtin?</code></pre>
+    <p>ל-man pages יש <em>sections</em>: section 1 הוא user commands, 5 הוא file formats, 8 הוא system administration. כששני דברים חולקים את אותו שם — פקודה וקובץ קונפיג — תפרידו עם המספר: <code>man passwd</code> פותח את הפקודה, <code>man 5 passwd</code> פותח את עמוד פורמט הקובץ שמתאר את <code>/etc/passwd</code>.</p>
+    <p>שינון <code>man hier</code> הוא מהלך בעל מנוף גבוה. הריצו אותו פעם אחת. זה עמוד אחד שמתאר את כל התיקיות הראשיות ב-FHS ומספר לכם מה אמור לחיות בכל אחת — ההפניה הקנונית, על כל מכונת לינוקס, ללא צורך באינטרנט.</p>
+
+    <h2 id="part-02">חלק 02 — שדרוגי Shell <span class="annotation">(שקופית 12)</span></h2>
+    <p>ה-shell הוא יותר מהרצת פקודות. היסטוריה, aliases, jobs, pipes, paths ו-prompts הופכים אותו לכלי שאתם מנווטים בו עם קצות האצבעות. החלק הזה מכסה את הזיכרון שריר היומיומי שמפריד בין "אני יודע להשתמש ב-shell" ל"אני חי בתוך shell".</p>
+    <div class="callout"><strong>בקרוב —</strong> חלק זה במתכונת שלד, אך טרם נכתב בפרוזה. ראו את השקופיות (עמודים 12–21) לכיסוי מלא עד אז.</div>
+
+    <h3>חזרו על עצמכם פחות — היסטוריה ו-aliases <span class="annotation">(שקופית 13)</span></h3>
+    <p><em>טרם נכתב:</em> <code>history</code>, <code>!!</code>, <code>!137</code>, <code>!ls</code>, <code>sudo !!</code>, חיפוש <kbd>Ctrl+R</kbd>, הגדרת aliases ושמירתם ב-<code>~/.bashrc</code> / <code>~/.zshrc</code>.</p>
+
+    <h3>קיצורי עריכת שורה <span class="annotation">(שקופית 14)</span></h3>
+    <p><em>טרם נכתב:</em> הקשות של readline — <kbd>Ctrl+A</kbd>/<kbd>E</kbd> לקצוות שורה, <kbd>Ctrl+U</kbd>/<kbd>K</kbd> ל-cut-to-ends, <kbd>Ctrl+W</kbd> מחיקת מילה, <kbd>Ctrl+R</kbd> reverse-search, <kbd>Tab</kbd> השלמה.</p>
+
+    <h3>jobs ארוכים <span class="annotation">(שקופית 15)</span></h3>
+    <p><em>טרם נכתב:</em> backgrounding עם <code>&amp;</code>, <code>jobs</code> / <code>fg</code> / <code>bg</code>, <kbd>Ctrl+Z</kbd> suspend, signals (<code>kill -TERM</code>, <code>kill -9</code>, <code>kill -HUP</code>), <code>nohup</code>, מתי לפנות ל-<code>tmux</code> / <code>screen</code> במקום.</p>
+
+    <h3>אינסטלציה ו-wildcards <span class="annotation">(שקופית 16)</span></h3>
+    <p><em>טרם נכתב:</em> הפניות (<code>&gt;</code>, <code>&gt;&gt;</code>, <code>2&gt;</code>, <code>&amp;&gt;</code>, <code>&lt;</code>), pipes (<code>|</code>), תבניות globbing (<code>*</code>, <code>?</code>, <code>[abc]</code>, <code>[!a]</code>, <code>{a,b,c}</code>, <code>**</code>), מודל הפילוסופיה Unix של "כלים קטנים מחוברים ב-pipes".</p>
+
+    <h3>חיתוך ה-stream — כלי טקסט <span class="annotation">(שקופית 17)</span></h3>
+    <p><em>טרם נכתב:</em> <code>grep</code> (<code>-i</code>, <code>-v</code>, <code>-r</code>), <code>cut -d:</code>, <code>sort -u</code>, <code>wc -l</code>, <code>tr</code>, <code>tee</code>, ואיך הם מתחברים ל-pipelines של עיבוד streams.</p>
+
+    <h3><code>$PATH</code> <span class="annotation">(שקופית 18)</span></h3>
+    <p><em>טרם נכתב:</em> מה זה <code>$PATH</code>, למה הסדר חשוב (התאמה ראשונה מנצחת), <code>which</code> מול <code>type</code>, שמירת <code>export</code>s ב-rc files, ההבדל בין login ו-interactive shells, האזהרה הקנונית של אל-תמחקו-את-<code>/usr/bin</code>.</p>
+
+    <h3>תעשו את זה שלכם — התאמת ה-prompt <span class="annotation">(שקופית 19)</span></h3>
+    <p><em>טרם נכתב:</em> קודי escape של <code>PS1</code> (<code>\u</code>, <code>\h</code>, <code>\w</code>, <code>\W</code>, <code>\t</code>, <code>\$</code>), הוספת צבע, שמירה ב-<code>~/.bashrc</code>.</p>
+
+    <h3>מ-one-liners לסקריפטים <span class="annotation">(שקופית 20)</span></h3>
+    <p><em>טרם נכתב:</em> שורת ה-shebang, <code>chmod +x</code>, parameter expansion עם ברירות מחדל (<code>${1:-friend}</code>), heredocs (<code>&lt;&lt;'EOF'</code>), <code>export</code> למשתני סביבה — גשר לקורס 02 (Shell Scripting).</p>
+
+    <h2 id="part-03">חלק 03 — מתחת למכסה המנוע <span class="annotation">(שקופית 22)</span></h2>
+    <p>מתחת לכל פקודה יש kernel, תהליך ואלף system calls. ידיעה של מה שיש למטה הופכת "קסם" להנדסה — ונותנת לכם את אוצר המילים שתזדקקו לו כשמשהו נשבר ב-3 בלילה.</p>
+    <div class="callout"><strong>בקרוב —</strong> ראו שקופיות 22–27 לכיסוי מלא.</div>
+
+    <h3>קרנל ומרחב המשתמש <span class="annotation">(שקופית 23)</span></h3>
+    <p><em>טרם נכתב:</em> אנלוגיית מנהל המלון, הגבול user/kernel, system calls, <code>strace</code> כחלון לתעבורת syscalls, מערכת הקבצים <code>/proc</code>.</p>
+
+    <h3><code>sudo</code> <span class="annotation">(שקופית 24)</span></h3>
+    <p><em>טרם נכתב:</em> מה <code>sudo</code> באמת עושה (set-uid root binary), <code>sudo -i</code> מול <code>sudo</code>, <code>sudo -l</code>, <code>visudo</code>, עיקרון ה-least privilege.</p>
+
+    <h3>תהליך ה-boot <span class="annotation">(שקופית 25)</span></h3>
+    <p><em>טרם נכתב:</em> BIOS/UEFI → bootloader (GRUB / systemd-boot) → קרנל + initrd → init/systemd → login shell. איפה להסתכל בכל שלב (<code>dmesg</code>, <code>journalctl -b</code>, <code>systemd-analyze</code>).</p>
+
+    <h3>systemd targets <span class="annotation">(שקופית 26)</span></h3>
+    <p><em>טרם נכתב:</em> runlevels ממופים ל-targets, <code>systemctl get-default</code>, <code>systemctl list-units --type=target</code>, מסנני journalctl (<code>-u</code>, <code>-f</code>, <code>-p err</code>, <code>--list-boots</code>), <code>systemd-analyze blame</code>.</p>
+
+    <h3>שבעה סוגי קבצים ו-FHS <span class="annotation">(שקופית 27)</span></h3>
+    <p><em>טרם נכתב:</em> שבעת תווי הסוג (<code>-</code>, <code>d</code>, <code>l</code>, <code>c</code>, <code>b</code>, <code>p</code>, <code>s</code>), עיקרון "הכל הוא קובץ", תיקיות ראשיות של FHS ותפקידיהן, למה <code>man hier</code> היא ההפניה הקנונית.</p>
+
+    <h2 id="part-04">חלק 04 — תפעול המערכת <span class="annotation">(שקופית 29)</span></h2>
+    <p>ה-shell נחמד. אבל על מכונה אמיתית אתם גם מתקינים תוכנה, עורכים קונפיגים, מנהלים משתמשים, ממאונטים דיסקים וכותבים שירותים. החלק הזה מכסה את עבודת התפעול היומיומית — מה שמפריד בין "אני יודע להשתמש ב-shell" ל"אני יודע להריץ מערכת".</p>
+    <div class="callout"><strong>בקרוב —</strong> ראו שקופיות 29–44 לכיסוי מלא.</div>
+
+    <h3><code>apt</code> + <code>dpkg</code> — ניהול חבילות ב-Debian / Ubuntu <span class="annotation">(שקופית 30)</span></h3>
+    <p><em>טרם נכתב:</em> הפיצול בין high-level ל-low-level, <code>apt update</code> / <code>install</code> / <code>upgrade</code> / <code>remove</code> / <code>purge</code> / <code>search</code> / <code>show</code>, מתי לרדת ל-<code>dpkg -i</code> / <code>-l</code> / <code>-L</code> / <code>-S</code>, התאוששות ממצב שבור עם <code>dpkg --configure -a</code> ו-<code>apt -f install</code>.</p>
+
+    <h3><code>dnf</code> + <code>rpm</code> — ניהול חבילות ב-RHEL / Fedora <span class="annotation">(שקופית 31)</span></h3>
+    <p><em>טרם נכתב:</em> הפעלים המקבילים במשפחת Red Hat, <code>dnf check-update</code> / <code>install</code> / <code>upgrade</code> / <code>autoremove</code>, low-level <code>rpm -ivh</code> / <code>-qa</code> / <code>-ql</code> / <code>-qf</code>, ההבדלים מ-apt.</p>
+
+    <h3>ניהול repositories <span class="annotation">(שקופית 32)</span></h3>
+    <p><em>טרם נכתב:</em> <code>/etc/apt/sources.list[.d]</code>, <code>add-apt-repository</code>, <code>/etc/apt/keyrings/</code>, <code>/etc/yum.repos.d/</code>, <code>dnf config-manager</code>, אימות GPG fingerprint — היגיינת שרשרת אספקה.</p>
+
+    <h3>הישרדות ב-<code>vi</code> <span class="annotation">(שקופית 33)</span></h3>
+    <p><em>טרם נכתב:</em> Modes (Normal / Insert / Visual / Ex), תנועה (<code>h j k l</code>, <code>w</code>/<code>b</code>, <code>0</code>/<code>$</code>, <code>gg</code>/<code>G</code>), ההקשות שמצילות את היום (<code>:w</code>, <code>:q!</code>, <code>x</code>, <code>dd</code>, <code>yy</code>, <code>p</code>, <code>:%s/old/new/g</code>, undo/redo), counts.</p>
+
+    <h3>הרשאות ובעלות <span class="annotation">(שקופית 34)</span></h3>
+    <p><em>טרם נכתב:</em> שלישיות rwx (owner/group/other), מתמטיקה אוקטלית, <code>chmod</code> סימבולי מול נומרי, <code>chown</code>, <code>chgrp</code>, מתי לפנות ל-<code>stat</code>.</p>
+
+    <h3>Bits מיוחדים — SUID, SGID, sticky <span class="annotation">(שקופית 35)</span></h3>
+    <p><em>טרם נכתב:</em> שלושת ה-bits הנוספים ומה הם באמת עושים; <code>umask</code> כמסנן default-mode; הפנייה ל-<code>setfacl</code> / <code>getfacl</code> ל-ACLs לכל משתמש.</p>
+
+    <h3>משתמשים וקבוצות <span class="annotation">(שקופית 36)</span></h3>
+    <p><em>טרם נכתב:</em> <code>/etc/passwd</code>, <code>/etc/shadow</code>, <code>/etc/group</code>, <code>useradd</code>/<code>usermod</code>/<code>passwd</code>/<code>groupadd</code>, <code>id</code>, <code>su</code>, החשיבות של <code>-aG</code>, <code>getent</code> לחיפושים שמודעים ל-LDAP/AD.</p>
+
+    <h3>תהליכים ומשאבים <span class="annotation">(שקופית 37)</span></h3>
+    <p><em>טרם נכתב:</em> תצוגה חיה של <code>top</code>/<code>htop</code>, <code>ps aux</code> / <code>ps -ef</code> / <code>ps --forest</code>, <code>free</code>/<code>df</code>/<code>du</code>, signals דרך <code>kill</code>, הצצה מתחת ל-<code>/proc/&lt;pid&gt;/</code>.</p>
+
+    <h3>ארכיונים ודחיסה <span class="annotation">(שקופית 38)</span></h3>
+    <p><em>טרם נכתב:</em> מנמוניקת הדגלים של <code>tar</code>, מתי לבחור gzip מול zstd, סטרימינג של tarball דרך <code>ssh</code>, תאימות עם <code>zip</code>.</p>
+
+    <h3>Cron ו-systemd timers <span class="annotation">(שקופית 39)</span></h3>
+    <p><em>טרם נכתב:</em> פורמט 5 השדות של crontab, <code>/etc/cron.d/*</code>, מתי לפנות ל-<code>.timer</code> של systemd במקום (לוגים, תלויות, on-boot triggers), <code>OnCalendar</code> מול <code>OnUnitActiveSec</code>.</p>
+
+    <h3>אחסון ומערכות קבצים <span class="annotation">(שקופית 40)</span></h3>
+    <p><em>טרם נכתב:</em> ארבע השכבות (block device → partition → filesystem → mount point), <code>lsblk</code>, <code>findmnt</code>, <code>mkfs</code>, <code>mount</code>/<code>umount</code>, <code>/etc/fstab</code> וכלל ה-UUID-not-device-path, swap.</p>
+
+    <h3>LVM <span class="annotation">(שקופית 41)</span></h3>
+    <p><em>טרם נכתב:</em> השכבות PV → VG → LV, שש הפקודות שמכסות 90% מפעולות LVM, snapshots, מתי LVM חשוב ומתי לא.</p>
+
+    <h3>לוגים <span class="annotation">(שקופית 42)</span></h3>
+    <p><em>טרם נכתב:</em> חצי הקבצי טקסט (<code>/var/log/syslog</code>, <code>/var/log/auth.log</code>, תיקיות per-service, <code>logrotate</code>) וחצי ה-systemd (<code>journalctl -xe</code>, <code>-u</code>, <code>-f</code>, <code>-p err</code>, <code>--since</code>, <code>--disk-usage</code>).</p>
+
+    <h3>כתיבת שירות systemd משלכם <span class="annotation">(שקופית 43)</span></h3>
+    <p><em>טרם נכתב:</em> מודל הסקציות <code>[Unit]</code>/<code>[Service]</code>/<code>[Install]</code>, <code>ExecStart</code>, <code>User=</code>, <code>Restart=</code>, <code>WantedBy=multi-user.target</code>, שילוב עם <code>.timer</code>, <code>daemon-reload</code> אחרי כל עריכה.</p>
+
+    <h3>רשתות — ערכת הישרדות <span class="annotation">(שקופית 44)</span></h3>
+    <p><em>טרם נכתב:</em> <code>ip addr</code>, <code>ip route</code>, <code>ping</code>, <code>ss -tlnp</code>, <code>curl</code>, <code>dig</code> — שש הפקודות שיוציאו אתכם מתקיעות עד שקורס 04 יקח את הרשתות ברצינות.</p>
+
+    <h2>הצעדים הבאים</h2>
+    <p>אם קראתם עד כאן יש לכם את הבסיס לשאר התוכנית. התחנה הטבעית הבאה היא <strong>קורס 02 — Shell Scripting</strong>, שמתחיל איפה שסעיף "מ-one-liners לסקריפטים" נגמר — הופך את הזיכרון שריר של ה-shell לאוטומציה אמינה. אחר כך, <strong>קורס 03 — Git ו-Version Control</strong> ו-<strong>קורס 04 — רשתות ו-SSH</strong> משלימים את ערכת הכלים שתזדקקו לפני containers, Kubernetes ושאר התוכנית.</p>
+
+    <footer class="doc-footer">
+      <span>קורס 01 — יסודות לינוקס · מדריך</span>
+      <span><a href="../index.html">↩ דף הקורס</a></span>
+    </footer>
+  </article>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lab 02 — Pipes &amp; PATH — Linux Fundamentals</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../index.html">Academy</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">Course 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">EN</a>
+    <span class="sep">/</span>
+    <span class="here">Lab 02 — Pipes &amp; PATH</span>
+    <span class="lang-switch">
+      <a href="lab-02-pipes-and-path.html" class="active">EN</a>
+      <a href="../../he/homework/lab-02-pipes-and-path.html">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">Course 01 · Linux Fundamentals · Homework</div>
+    <h1>Lab 02 — Pipes &amp; PATH</h1>
+    <p class="lede">Compose commands with pipes, redirection, and globbing — then control where the shell finds programs by editing <code>$PATH</code>.</p>
+
+    <table class="meta">
+      <tbody>
+        <tr><th>Course</th><td>01 — Linux Fundamentals</td></tr>
+        <tr><th>Time</th><td>~45 minutes</td></tr>
+        <tr><th>Deliverable</th><td><code>~/lab-02/transcript.txt</code> + <code>~/bin/greet</code> (a custom script on your PATH) + a one-paragraph reflection</td></tr>
+        <tr><th>Maps to slides</th><td>14–16 (Pipes &amp; globs · PATH · Prompt)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Goal</h2>
+    <p>Stop treating commands as isolated tools. Learn to <em>compose</em> — pipe the output of one into the input of another, redirect streams to files, and use wildcards to operate on many files at once. Then take control of your environment by editing <code>$PATH</code> so the shell finds your own scripts.</p>
+
+    <h2>Setup</h2>
+    <p>A Linux terminal (VM, WSL, cloud, or macOS — most flags match). Confirm you're at home:</p>
+<pre><code>cd ~
+pwd</code></pre>
+    <p>Create a workspace for this lab:</p>
+<pre><code>mkdir -p ~/lab-02/{logs,reports}
+cd ~/lab-02</code></pre>
+
+    <h2>Tasks</h2>
+
+    <h3><span class="stepnum">01</span>Inspect <code>$PATH</code></h3>
+    <p>Before you change <code>$PATH</code>, look at what's already there.</p>
+<pre><code>echo $PATH
+echo $PATH | tr ':' '\n'      # one directory per line
+which ls
+which python3 || echo "no python3 on PATH"
+type cd                       # builtin? alias? file?</code></pre>
+    <blockquote>What's the FIRST directory on your <code>$PATH</code>? When you type <code>ls</code>, why does <code>/usr/bin/ls</code> run instead of <code>/bin/ls</code>?</blockquote>
+
+    <h3><span class="stepnum">02</span>Globbing — wildcards</h3>
+    <p>Create some files to play with:</p>
+<pre><code>cd ~/lab-02
+touch alpha.txt beta.txt gamma.txt readme.md
+touch logs/{2024-01,2024-02,2024-03}.log</code></pre>
+    <p>Try each wildcard:</p>
+<pre><code>ls *.txt                # all .txt files
+ls *.md                 # all .md files
+ls logs/*.log           # all .log files in logs/
+ls logs/2024-0?.log     # ? = exactly one character
+ls [ab]*.txt            # starts with a or b
+ls [!a]*.txt            # does NOT start with a</code></pre>
+
+    <h3><span class="stepnum">03</span>Redirection — &gt; · &gt;&gt; · 2&gt;</h3>
+    <p>Streams: stdout (1), stderr (2). Direct them independently.</p>
+<pre><code>ls -la           &gt;  reports/listing.txt    # stdout overwrite
+date             &gt;&gt; reports/listing.txt    # stdout append
+ls /nope         2&gt; reports/errors.txt     # stderr to file
+ls / /nope       &gt;  reports/mixed.txt 2&gt;&amp;1  # both into one file
+cat reports/listing.txt</code></pre>
+    <blockquote>What's in <code>reports/errors.txt</code>? What's the difference between <code>2&gt;</code> and <code>&gt;</code>?</blockquote>
+
+    <h3><span class="stepnum">04</span>Pipes — compose commands</h3>
+    <p>The pipe (<code>|</code>) sends stdout of the left command as stdin to the right. Read each example and run it:</p>
+<pre><code># count how many .log files in /var/log
+ls /var/log/*.log 2&gt;/dev/null | wc -l
+
+# the 5 largest files in /etc
+ls -lS /etc 2&gt;/dev/null | head -n 6
+
+# everyone running bash right now
+ps aux | grep bash | grep -v grep
+
+# unique shells used on this system
+cat /etc/passwd | cut -d: -f7 | sort -u</code></pre>
+
+    <h3><span class="stepnum">05</span>Build your own pipeline</h3>
+    <p>Combine pipes + globs + redirection. Save the output to a file.</p>
+<pre><code># count error lines across the lab's logs
+echo "error_1" &gt;  logs/2024-01.log
+echo "info"    &gt;&gt; logs/2024-01.log
+echo "error_2" &gt;  logs/2024-02.log
+echo "ERROR_3" &gt;  logs/2024-03.log
+
+cat logs/*.log | grep -i "error" | sort -u &gt; reports/all-errors.txt
+cat reports/all-errors.txt
+wc -l reports/all-errors.txt</code></pre>
+
+    <h3><span class="stepnum">06</span>Make your own command, put it on <code>$PATH</code></h3>
+    <p>Create a tiny script that greets by name.</p>
+<pre><code>mkdir -p ~/bin
+cat &gt; ~/bin/greet &lt;&lt;'EOF'
+#!/usr/bin/env bash
+name="${1:-friend}"
+echo "Hello, $name. Welcome to lab-02."
+EOF
+chmod +x ~/bin/greet</code></pre>
+    <p>Try running it. It won't work yet:</p>
+<pre><code>greet world
+# bash: greet: command not found</code></pre>
+    <p>That's because <code>~/bin</code> isn't on <code>$PATH</code>. Add it for this shell:</p>
+<pre><code>export PATH="$HOME/bin:$PATH"
+echo $PATH | head -c 60        # confirm ~/bin is first
+greet world                    # → Hello, world. ...</code></pre>
+
+    <h3><span class="stepnum">07</span>Persist the change</h3>
+    <p><code>export</code> only lasts for the current shell. To make it permanent:</p>
+<pre><code># bash users:
+echo 'export PATH="$HOME/bin:$PATH"' &gt;&gt; ~/.bashrc
+
+# zsh users:
+echo 'export PATH="$HOME/bin:$PATH"' &gt;&gt; ~/.zshrc
+
+# reload without logging out:
+source ~/.bashrc   # or source ~/.zshrc</code></pre>
+    <p>Open a new terminal and type <code>greet $(whoami)</code> — it should work without re-exporting.</p>
+
+    <h3><span class="stepnum">08</span>Capture your work</h3>
+<pre><code>cd ~/lab-02
+history | tail -n 100 &gt; transcript.txt
+ls -laR ~/lab-02 ~/bin/greet &gt;&gt; transcript.txt
+echo "--- PATH ---"          &gt;&gt; transcript.txt
+echo $PATH                    &gt;&gt; transcript.txt</code></pre>
+
+    <h2>Hints</h2>
+    <ul>
+      <li><strong><code>2&gt;/dev/null</code></strong> silences stderr — useful when a command spams "Permission denied" for files you don't care about.</li>
+      <li><strong><code>&amp;&gt;</code></strong> in bash redirects both stdout and stderr at once. Less typing than <code>&gt; file 2&gt;&amp;1</code>.</li>
+      <li><strong><code>type &lt;cmd&gt;</code></strong> tells you if a command is a binary on PATH, an alias, a shell builtin, or a function. Reach for it when "where does this come from?" matters.</li>
+      <li><strong>Shell rc files:</strong> bash reads <code>~/.bashrc</code> for interactive shells, <code>~/.bash_profile</code> for login shells; zsh reads <code>~/.zshrc</code>. If your edits don't take effect, you might be editing the wrong file.</li>
+      <li><strong>Order matters in <code>$PATH</code>:</strong> the FIRST matching directory wins. Put <code>~/bin</code> at the front to override system commands.</li>
+    </ul>
+
+    <h2>Deliverable</h2>
+    <p>Submit:</p>
+    <ol>
+      <li><code>~/lab-02/transcript.txt</code> — your command history + ls + PATH dump.</li>
+      <li><code>~/bin/greet</code> — your script (a one-line "I made this" works as a deliverable).</li>
+      <li>The exact line you added to <code>~/.bashrc</code> or <code>~/.zshrc</code>.</li>
+      <li>A one-paragraph reflection: which compose pattern (pipe vs redirect vs glob) felt most natural, and which surprised you?</li>
+    </ol>
+
+    <h2>Stretch (optional)</h2>
+    <ul>
+      <li><strong>One-liner challenge:</strong> using only one pipeline (no temp files), print the 3 most common login shells on the system.</li>
+      <li><strong>PATH archaeology:</strong> for every directory in <code>$PATH</code>, count how many executables it contains. Hint: <code>ls -la &lt;dir&gt; | wc -l</code> looped, or <code>find &lt;dir&gt; -maxdepth 1 -executable</code>.</li>
+      <li><strong>tee:</strong> use <code>tee</code> to write a pipeline's output to a file <em>and</em> stdout at the same time. Compose with the error pipeline from task 05.</li>
+      <li><strong>Shebang variants:</strong> rewrite <code>greet</code> with <code>#!/bin/sh</code>. Does anything break? Why?</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>Course 01 — Linux Fundamentals · Lab 02</span>
+      <span><a href="../index.html">↩ course home</a></span>
+    </footer>
+  </article>
+</body>
+</html>

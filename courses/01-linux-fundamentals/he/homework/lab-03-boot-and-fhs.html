@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>מעבדה 03 — Boot ו-FHS — יסודות לינוקס</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../he/index.html">אקדמיה</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">קורס 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">עברית</a>
+    <span class="sep">/</span>
+    <span class="here">מעבדה 03 — Boot ו-FHS</span>
+    <span class="lang-switch">
+      <a href="../../en/homework/lab-03-boot-and-fhs.html">EN</a>
+      <a href="lab-03-boot-and-fhs.html" class="active">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">קורס 01 · יסודות לינוקס · שיעורי בית</div>
+    <h1>מעבדה 03 — Boot ו-FHS</h1>
+    <p class="lede">להציץ מתחת למכסה המנוע — לעקוב אחר לוח הזמנים של ה-boot עם <code>dmesg</code> ו-<code>journalctl</code>, לבדוק targets ושירותים של <code>systemd</code>, לזהות את כל שבעת סוגי הקבצים בלינוקס, ולסייר בתיקיות הראשיות של FHS.</p>
+
+    <table class="meta">
+      <tbody>
+        <tr><th>קורס</th><td>01 — יסודות לינוקס</td></tr>
+        <tr><th>זמן</th><td>כשעה</td></tr>
+        <tr><th>תוצר</th><td><code>~/lab-03/transcript.txt</code> + <code>~/lab-03/boot-timeline.md</code> + רפלקציה של פסקה אחת</td></tr>
+        <tr><th>תואם למצגת</th><td>שקופיות 20–22 (תהליך boot · systemd targets · סוגי קבצים ו-FHS)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <strong>למשתמשי macOS —</strong> המעבדה הזו דורשת לינוקס אמיתי. רוב הפקודות (<code>journalctl</code>, <code>systemctl</code>, <code>/proc</code>) לא קיימות ב-macOS. השתמשו ב-VM, WSL2, או SSH לשרת לינוקס בענן.
+    </div>
+
+    <h2>מטרה</h2>
+    <p>להפסיק לראות את מערכת ההפעלה כקופסה שחורה. בסוף המעבדה תוכלו: לעקוב אחר מה שקורה בין הדלקה ל-login shell; לזהות מה רץ ולמה; להבחין בין קובץ רגיל ל-device, socket, או named pipe במבט אחד; ולנווט בכל מערכת קבצים לא מוכרת של לינוקס לפי תפקיד ולא לפי זיכרון.</p>
+
+    <h2>הכנה</h2>
+    <p>סביבת לינוקס אמיתית עם <code>systemd</code> (Ubuntu, Debian, Fedora, Arch — כמעט הכל המודרני). אשרו:</p>
+<pre><code>uname -a               # קרנל + ארכיטקטורה
+cat /etc/os-release    # זהות הדיסטרו
+systemctl --version    # אשרו ש-systemd הוא ה-init</code></pre>
+    <p>צרו סביבת עבודה למעבדה:</p>
+<pre><code>mkdir -p ~/lab-03
+cd ~/lab-03</code></pre>
+
+    <h2>משימות</h2>
+
+    <h3><span class="stepnum">01</span>הלוגים של הקרנל עצמו</h3>
+    <p><code>dmesg</code> מדפיס את ה-ring buffer של הקרנל — מה שהקרנל עצמו רשם מההדלקה. בחלק מהדיסטרוס דרוש <code>sudo</code>.</p>
+<pre><code>dmesg | head -n 20          # השורות הראשונות אחרי boot
+dmesg | tail -n 20          # האירועים העדכניים של הקרנל
+dmesg | grep -i "usb"       # אילו התקני USB הקרנל ראה
+dmesg | grep -i "ext4\|xfs\|btrfs"   # mounts של מערכות קבצים</code></pre>
+    <blockquote>מה הדבר הראשון שהקרנל שלכם רשם אחרי boot? איזה CPU הוא זיהה?</blockquote>
+
+    <h3><span class="stepnum">02</span>היומן מה-boot הנוכחי</h3>
+    <p><code>journalctl</code> הוא יומן ה-systemd המאוחד. <code>-b</code> = boot הנוכחי, <code>-b -1</code> = boot קודם.</p>
+<pre><code>journalctl -b | head -n 30         # boot מההתחלה
+journalctl -b --no-pager | wc -l   # כמה שורות log ב-boot הזה
+journalctl -b -p err               # רק שגיאות
+journalctl --list-boots            # כל boot שתועד
+journalctl _PID=1 -b | head -n 20  # רק מה ש-PID 1 (systemd) אמר</code></pre>
+
+    <h3><span class="stepnum">03</span>systemd targets ושירותים</h3>
+    <p>Targets הם קבוצות שירותים מאוגדות בשם. שירותים הם units ש-<code>systemd</code> מנהל.</p>
+<pre><code>systemctl get-default                       # multi-user.target? graphical.target?
+systemctl list-units --type=target          # כל ה-targets הפעילים
+systemctl list-units --type=service --state=running | head -n 20
+systemctl list-units --failed               # משהו נשבר?
+systemctl status                             # עץ התמונה המלאה</code></pre>
+    <p>בחרו שירות אחד שרץ על המכונה שלכם (למשל <code>ssh.service</code>, <code>cron.service</code>, <code>NetworkManager.service</code>) ובדקו אותו:</p>
+<pre><code>systemctl status &lt;service&gt;.service
+systemctl cat &lt;service&gt;.service              # קובץ ה-unit עצמו
+journalctl -u &lt;service&gt;.service -n 30        # הלוגים שלו</code></pre>
+
+    <h3><span class="stepnum">04</span>זיהוי שבעת סוגי הקבצים</h3>
+    <p>התו הראשון ב-<code>ls -l</code> אומר לכם איזה סוג קובץ אתם מסתכלים עליו: <code>-</code> רגיל, <code>d</code> תיקייה, <code>l</code> symlink, <code>c</code> char device, <code>b</code> block device, <code>p</code> named pipe, <code>s</code> socket.</p>
+    <p>מצאו דוגמה אחת לכל אחד:</p>
+<pre><code>ls -l /etc/hosts                       # -    קובץ רגיל
+ls -ld /var/log                        # d    תיקייה
+ls -l /bin                             # l    symlink (בהרבה דיסטרוס /bin → /usr/bin)
+ls -l /dev/tty                         # c    character device
+ls -l /dev/sda 2>/dev/null || ls -l /dev/disk0   # b    block device
+ls -l /dev/log 2>/dev/null || find /run -type p 2>/dev/null | head -n1 | xargs -I{} ls -l {}
+ls -l /var/run/docker.sock 2>/dev/null || find /run -type s 2>/dev/null | head -n1 | xargs -I{} ls -l {}</code></pre>
+    <blockquote>תיעדו דוגמה אחת לכל סוג — הדביקו אותן לסקציה ב-<code>boot-timeline.md</code> אחר כך.</blockquote>
+
+    <h3><span class="stepnum">05</span>FHS — סיור הליכה</h3>
+    <p>בקרו בכל תיקייה ראשית והסתכלו על דבר אחד מעיד.</p>
+<pre><code>ls /                       # הראש המלא
+ls /bin | wc -l            # כמה binaries של משתמש
+ls /sbin | head            # binaries לניהול מערכת
+cat /etc/os-release        # /etc = תצורה
+ls /home                   # תיקייה לכל משתמש
+ls /var/log | head         # /var = נתונים משתנים (בעיקר logs)
+ls /usr/share | head       # /usr = תוכנות מותקנות, read-only
+ls /tmp                    # /tmp = scratch (נמחק בדרך כלל ב-reboot)
+cat /proc/cpuinfo | head   # /proc = תצוגה חיה של הקרנל
+cat /proc/meminfo | head
+ls /sys/class | head       # /sys = אובייקטים של הקרנל (devices, modules)
+ls /dev | head             # /dev = קבצי התקנים</code></pre>
+
+    <h3><span class="stepnum">06</span>הצצה ל-PID 1</h3>
+    <p>כל תהליך בלינוקס יורד מ-PID 1. במכונות systemd, זה <code>systemd</code> עצמו.</p>
+<pre><code>ps -p 1 -o pid,comm,args
+ls -la /proc/1/exe         # symlink ל-binary שרץ
+cat /proc/1/cmdline | tr '\0' ' '; echo  # איך הוא הופעל
+ls /proc/1/fd | head       # file descriptors ש-PID 1 פתח</code></pre>
+
+    <h3><span class="stepnum">07</span>כתבו את לוח הזמנים של ה-boot שלכם</h3>
+    <p>פתחו את <code>~/lab-03/boot-timeline.md</code> בעורך וכתבו נרטיב קצר: <em>"במכונה שלי, הנה מה שקרה בין החשמל ל-login."</em> השתמשו בראיות האמיתיות שאספתם.</p>
+<pre><code># התחילו את הקובץ עם תבנית:
+cat &gt; ~/lab-03/boot-timeline.md &lt;&lt;'EOF'
+# לוח זמנים של boot — נצפה במכונה שלי
+
+## 1. Firmware
+- (מתוך `cat /sys/firmware/efi/...` או BIOS): ...
+
+## 2. Bootloader
+- (מהדיסטרו שלכם — GRUB? systemd-boot?): ...
+
+## 3. Kernel
+- גרסה: (מתוך `uname -r`):
+- שורת dmesg ראשונה: ...
+
+## 4. initrd / initramfs
+- mounted ב-boot, מוסר ל-root האמיתי: ...
+
+## 5. systemd כ-PID 1
+- Default target: (מתוך `systemctl get-default`):
+- מספר שירותים פעילים: ...
+
+## 6. Login shell
+- Default shell: (מתוך `echo $SHELL`):
+
+## שבעת סוגי הקבצים שמצאתי
+- `-` רגיל: ...
+- `d` תיקייה: ...
+- `l` symlink: ...
+- `c` char device: ...
+- `b` block device: ...
+- `p` named pipe: ...
+- `s` socket: ...
+EOF</code></pre>
+    <p>מלאו עם הערכים האמיתיים מהמכונה שלכם.</p>
+
+    <h3><span class="stepnum">08</span>שמירת העבודה</h3>
+<pre><code>cd ~/lab-03
+history | tail -n 150 &gt; transcript.txt
+{
+  echo "=== uname ===";        uname -a
+  echo "=== os-release ===";   cat /etc/os-release
+  echo "=== default target ==="; systemctl get-default
+  echo "=== failed units ==="; systemctl list-units --failed
+} &gt;&gt; transcript.txt</code></pre>
+
+    <h2>טיפים</h2>
+    <ul>
+      <li><strong><code>journalctl -f</code></strong> עוקב אחרי רשומות log חדשות בזמן אמת — כמו <code>tail -f</code> ליומן המערכת. שימושי לראות מה קורה כשאתם start/stop שירותים בטרמינל אחר.</li>
+      <li><strong>אל תריצו <code>isolate</code> בקלות.</strong> <code>systemctl isolate rescue.target</code> מבעיט כל שירות אחר — בסדר ב-VM אישי, רע ב-SSH לשרת שאכפת לכם ממנו.</li>
+      <li><strong><code>/proc</code> הוא מזויף.</strong> הקבצים שם לא יושבים על דיסק — הם תצוגה חיה של נתוני קרנל. לכן <code>cat /proc/cpuinfo</code> תמיד מציג מידע עכשווי.</li>
+      <li><strong>סוג הקובץ <code>l</code> נמצא בכל מקום.</strong> בהרבה דיסטרוס <code>/bin</code>, <code>/sbin</code>, <code>/lib</code> הם symlinks ל-<code>/usr</code>. עולם ה-"usrmerge".</li>
+      <li><strong>אם פקודה דורשת <code>sudo</code> ואין לכם,</strong> תרשמו את זה ב-transcript ("dmesg דורש sudo ב-Ubuntu &gt;= 23"). המעבדה עדיין נחשבת.</li>
+    </ul>
+
+    <h2>תוצר</h2>
+    <p>הגישו:</p>
+    <ol>
+      <li><code>~/lab-03/transcript.txt</code> — היסטוריית פקודות + uname + os-release + default target + failed units.</li>
+      <li><code>~/lab-03/boot-timeline.md</code> — הנרטיב המלא שלכם של ששת שלבי ה-boot, ועוד שבע דוגמאות של סוגי קבצים.</li>
+      <li>רפלקציה של פסקה אחת: איזה שלב שינה לכם את התפיסה של "מה זו מערכת הפעלה"?</li>
+    </ol>
+
+    <h2>אתגרים (אופציונלי)</h2>
+    <ul>
+      <li><strong>עץ תלויות שירותים:</strong> הריצו <code>systemctl list-dependencies multi-user.target</code> (או ה-default target שלכם). מה בשורש?</li>
+      <li><strong>זמן boot:</strong> <code>systemd-analyze</code> אומר כמה זמן boot לקח. <code>systemd-analyze blame</code> מסדר שירותים לפי זמן הפעלה. איזה שירות הכי איטי במכונה שלכם?</li>
+      <li><strong>Bind mounts ב-<code>/proc</code>:</strong> השוו <code>cat /proc/self/mounts</code> ל-<code>mount</code>. מה ההבדל?</li>
+      <li><strong>כתבו unit משלכם ל-systemd</strong> (אל תפעילו אותו). הניחו קובץ <code>.service</code> ב-<code>~/.config/systemd/user/</code> שמריץ <code>echo hello &gt;&gt; ~/lab-03/hello.log</code>. הריצו עם <code>systemctl --user start &lt;name&gt;.service</code>. קראו את היומן שלו.</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>קורס 01 — יסודות לינוקס · מעבדה 03</span>
+      <span><a href="../index.html">↩ דף הקורס</a></span>
+    </footer>
+  </article>
+</body>
+</html>

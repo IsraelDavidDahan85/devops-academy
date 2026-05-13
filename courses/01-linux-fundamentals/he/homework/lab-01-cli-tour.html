@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>מעבדה 01 — סיור CLI — יסודות לינוקס</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../he/index.html">אקדמיה</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">קורס 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">עברית</a>
+    <span class="sep">/</span>
+    <span class="here">מעבדה 01 — סיור CLI</span>
+    <span class="lang-switch">
+      <a href="../../en/homework/lab-01-cli-tour.html">EN</a>
+      <a href="lab-01-cli-tour.html" class="active">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">קורס 01 · יסודות לינוקס · שיעורי בית</div>
+    <h1>מעבדה 01 — סיור CLI</h1>
+    <p class="lede">לנוע במערכת קבצים של לינוקס בביטחון — לנווט, ליצור, לבדוק, להעתיק ולנקות, הכל מתוך ה-shell.</p>
+
+    <table class="meta">
+      <tbody>
+        <tr><th>קורס</th><td>01 — יסודות לינוקס</td></tr>
+        <tr><th>זמן</th><td>כ-45 דקות</td></tr>
+        <tr><th>תוצר</th><td><code>~/lab-01/transcript.txt</code> + <code>~/lab-01/tree.txt</code> + רפלקציה של פסקה אחת</td></tr>
+        <tr><th>תואם למצגת</th><td>שקופיות 4–9 (חלק 01 — ה-Shell)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>מטרה</h2>
+    <p>לשבת מול כל מכונת לינוקס ולחוש בנוח תוך פחות מ-30 שניות. בסיום המעבדה תוכלו לנווט, ליצור קבצים, לצפות בהם, להעתיק/לשנות שם, ולנקות בבטחה — בלי להגיע למנוע חיפוש.</p>
+
+    <h2>הכנה</h2>
+    <p>אתם צריכים טרמינל עובד בסביבת לינוקס אמיתית:</p>
+    <ul>
+      <li>VM של לינוקס (multipass, VirtualBox, UTM, Lima וכו׳),</li>
+      <li>WSL2 על Windows,</li>
+      <li>VM בענן עם SSH, או</li>
+      <li>macOS — רוב הפקודות עובדות, אבל כמה דגלים שונים (במיוחד <code>ls</code>, <code>tail</code> ו-<code>stat</code>).</li>
+    </ul>
+    <p>פתחו טרמינל. ודאו שאתם בתיקיית הבית:</p>
+<pre><code>echo $HOME
+pwd</code></pre>
+    <p>אם <code>pwd</code> לא תואם ל-<code>$HOME</code>, הריצו <code>cd ~</code> קודם.</p>
+
+    <h2>משימות</h2>
+    <p>עברו עליהן בסדר. אל תדביקו עיוור — קראו כל שורה לפני שאתם לוחצים Enter, במיוחד את ההרסניות.</p>
+
+    <h3><span class="stepnum">01</span>התמצאות</h3>
+<pre><code>whoami            # תחת איזה משתמש אני מחובר
+hostname          # על איזו מכונה
+pwd               # איפה אני
+ls                # מה יש כאן
+ls -la            # כל האמת — כולל קבצים מוסתרים</code></pre>
+    <p>עכשיו תציצו במערכת עצמה — בלי לשנות כלום:</p>
+<pre><code>ls /              # ראש מערכת הקבצים
+ls /etc | head    # קבצי תצורה
+ls /var/log       # קבצי לוג</code></pre>
+    <blockquote>שאלות לתשובה עצמית: כמה תיקיות יש ב-<code>/</code>? בערך כמה קבצים יש ב-<code>/etc</code>?</blockquote>
+
+    <h3><span class="stepnum">02</span>בניית סביבת עבודה</h3>
+    <p>יצירת מבנה מקונן בפעולה אחת:</p>
+<pre><code>mkdir -p ~/lab-01/{notes,scripts,logs}
+cd ~/lab-01
+ls -la</code></pre>
+    <p>אתם אמורים לראות שלוש תיקיות. <code>mkdir -p</code> הוא אידמפוטנטי — הרצה חוזרת לא תזיק.</p>
+
+    <h3><span class="stepnum">03</span>יצירת קבצים</h3>
+    <p>שלוש דרכים ליצור קובץ:</p>
+<pre><code>touch notes/hello.md                              # קובץ ריק
+echo "first line"  &gt; notes/journal.md             # דריסה (קובץ עם שורה אחת)
+echo "second line" &gt;&gt; notes/journal.md            # הוספה לסוף
+printf "alpha\nbeta\ngamma\n" &gt; notes/letters.md  # מולטי-שורה</code></pre>
+    <p>אישור:</p>
+<pre><code>ls -la notes/
+cat notes/journal.md
+cat notes/letters.md</code></pre>
+
+    <h3><span class="stepnum">04</span>צפייה בקבצים</h3>
+    <p>נסו את כל הקוראים על אותו קובץ:</p>
+<pre><code>cat notes/letters.md
+head -n 2 notes/letters.md
+tail -n 2 notes/letters.md
+less notes/letters.md      # q לסיום; /alpha ואז n/N לחיפוש</code></pre>
+    <p>עכשיו נסו את הקובץ החי. ב<strong>טרמינל A</strong>:</p>
+<pre><code>tail -f logs/live.log</code></pre>
+    <p>ב<strong>טרמינל שני</strong> (פתחו טאב חדש):</p>
+<pre><code>cd ~/lab-01
+for i in 1 2 3; do
+  echo "event $i" &gt;&gt; logs/live.log
+  sleep 1
+done</code></pre>
+    <p>תסתכלו על טרמינל A. השורות החדשות מופיעות כשהן נכתבות. ככה מהנדסים צופים בלוגים בייצור. לחצו <code>Ctrl + C</code> בטרמינל A כשתסיימו.</p>
+
+    <h3><span class="stepnum">05</span>רשימת קבצים כמו מקצוען</h3>
+<pre><code>ls -l notes/                # פורמט ארוך
+ls -lah notes/              # + גדלים קריאים, + מוסתרים
+ls -ltr notes/              # ממוין לפי זמן, הישן ראשון
+ls -lSr notes/              # ממוין לפי גודל, הקטן ראשון</code></pre>
+    <p>קראו את העמודות של <code>ls -l</code> בקפידה — הרשאות, links, בעלים, קבוצה, גודל, תאריך, שם. (שקופית 08 כוללת את דיאגרמת האנטומיה.)</p>
+
+    <h3><span class="stepnum">06</span>שימוש במערכת העזרה</h3>
+    <p>בלי לחפש באינטרנט, מצאו:</p>
+    <ul>
+      <li>הדגל של <code>cp</code> ששומר הרשאות וחותמות זמן.</li>
+      <li>הדגל של <code>rm</code> ששואל לפני כל מחיקה.</li>
+      <li>מה <code>tee</code> עושה.</li>
+    </ul>
+    <p>השתמשו בכלים הבאים:</p>
+<pre><code>man cp           # מדריך מלא; q לסיום
+cp --help        # הפניה מהירה
+whatis tee       # תיאור של שורה אחת
+type ls          # האם זה binary, alias, או builtin
+which ls         # איפה ב-$PATH הפקודה יושבת</code></pre>
+
+    <h3><span class="stepnum">07</span>העתקה, שינוי שם והעברה</h3>
+<pre><code>cp notes/letters.md notes/letters-backup.md
+cp -r notes scripts/notes-copy
+mv notes/hello.md notes/intro.md          # שינוי שם (אותה תיקייה)
+mv notes/intro.md scripts/                # העברה (תיקייה אחרת)
+ls -R                                     # רשימה רקורסיבית</code></pre>
+
+    <h3><span class="stepnum">08</span>ניקיון — בזהירות</h3>
+    <p>תמיד תריצו <code>ls</code> על מה שאתם עומדים למחוק, ורק אז תמחקו:</p>
+<pre><code>ls scripts/notes-copy
+rm -i scripts/notes-copy/letters.md       # -i = אישור לכל אחד
+rm -r scripts/notes-copy                  # מחיקת התיקייה + תוכן</code></pre>
+    <div class="callout warn">
+      <strong>סכנה —</strong> אל תקלידו <code>rm -rf ~</code> או <code>rm -rf /</code>, אפילו לא בצחוק. אין undo.
+    </div>
+
+    <h3><span class="stepnum">09</span>שמירת העבודה</h3>
+    <p>שמרו שני תוצרים בתוך <code>~/lab-01/</code>:</p>
+<pre><code>cd ~/lab-01
+history | tail -n 100 &gt; transcript.txt    # 100 הפקודות האחרונות שלכם
+find . -type f -o -type d | sort &gt; tree.txt
+cat tree.txt</code></pre>
+    <p>שני הקבצים האלה הם התוצר.</p>
+
+    <h2>טיפים</h2>
+    <ul>
+      <li><strong>השלמה אוטומטית</strong> היא מעצמת-העל שלכם. לחצו <code>Tab</code> פעם אחת להשלמה; פעמיים לרשימת אפשרויות.</li>
+      <li><strong>שכחתם <code>sudo</code>?</strong> <code>sudo !!</code> מריץ מחדש את הפקודה האחרונה עם <code>sudo</code>.</li>
+      <li><strong><code>pwd</code> לעיתים קרובות.</strong> שלוש אותיות, Enter אחד — אל תהיו במצב של אי-ידיעה איפה אתם.</li>
+      <li><strong>תהיו פרנואידים לגבי <code>rm -rf</code>.</strong> תהפכו ל-<code>ls</code> ראשון להרגל, <code>rm -i</code> כשלא בטוחים.</li>
+      <li><strong><code>Ctrl + R</code></strong> מחפש בהיסטוריה בזמן אמת. נסו.</li>
+      <li><strong><code>Ctrl + C</code></strong> מבטל את הפקודה הנוכחית. <strong><code>Ctrl + Z</code></strong> משעה אותה (להמשך — <code>fg</code>).</li>
+    </ul>
+
+    <h2>תוצר</h2>
+    <p>הגישו (הדביקו במסמך, דחפו לריפו, או commit כחלק משיעורי הבית):</p>
+    <ol>
+      <li><code>~/lab-01/transcript.txt</code> — היסטוריית הפקודות שלכם.</li>
+      <li><code>~/lab-01/tree.txt</code> — מבנה התיקיות שנוצר.</li>
+      <li>רפלקציה של פסקה אחת: איזו פקודה הפתיעה אתכם, ובאיזו תשתמשו הכי הרבה?</li>
+    </ol>
+
+    <h2>אתגרים (אופציונלי)</h2>
+    <ul>
+      <li><strong>Pipe + ספירה:</strong> כמה קבצים (לא תיקיות) יש ב-<code>/etc</code>? בנו את התשובה עם <code>ls</code>, <code>grep</code> ו-<code>wc -l</code>.</li>
+      <li><strong>חמשת קבצי הלוג הגדולים</strong> ב-<code>/var/log</code>: שלבו <code>ls -lS</code> עם <code>head</code>.</li>
+      <li><strong><code>script(1)</code>:</strong> התחילו הקלטה עם <code>script ~/lab-01/session.log</code>, עשו כמה פקודות, ואז <code>exit</code>. פתחו את הלוג — מה נתפס.</li>
+      <li><strong>תסתכלו על מאגר הקרנל:</strong> <code>dmesg | tail</code>. מה הדבר האחרון שהקרנל רשם?</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>קורס 01 — יסודות לינוקס · מעבדה 01</span>
+      <span><a href="../index.html">↩ דף הקורס</a></span>
+    </footer>
+  </article>
+</body>
+</html>

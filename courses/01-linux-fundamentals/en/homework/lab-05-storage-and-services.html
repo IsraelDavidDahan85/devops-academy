@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lab 05 — Storage &amp; Services — Linux Fundamentals</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../index.html">Academy</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">Course 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">EN</a>
+    <span class="sep">/</span>
+    <span class="here">Lab 05 — Storage &amp; Services</span>
+    <span class="lang-switch">
+      <a href="lab-05-storage-and-services.html" class="active">EN</a>
+      <a href="../../he/homework/lab-05-storage-and-services.html">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">Course 01 · Linux Fundamentals · Homework</div>
+    <h1>Lab 05 — Storage &amp; Services</h1>
+    <p class="lede">Create a fake disk from a regular file, format it, mount it, persist the mount across reboots, then write a systemd service + timer that writes to it on a schedule. Watch the whole thing fire via <code>journalctl</code>.</p>
+
+    <table class="meta">
+      <tbody>
+        <tr><th>Course</th><td>01 — Linux Fundamentals</td></tr>
+        <tr><th>Time</th><td>~75 minutes</td></tr>
+        <tr><th>Deliverable</th><td><code>~/lab-05/transcript.txt</code> + your <code>/etc/fstab</code> line + your <code>backup.service</code> &amp; <code>backup.timer</code> + a reflection paragraph</td></tr>
+        <tr><th>Maps to slides</th><td>40–43 (Part 04 — Operating the system)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Goal</h2>
+    <p>By the end of this lab you can: build a block device from a regular file (loopback), put a filesystem on it, mount it, make it survive a reboot via <code>/etc/fstab</code> using a UUID (never a device path), and write your own systemd service paired with a timer that runs it on a schedule.</p>
+
+    <h2>Setup</h2>
+    <p>You need a real Linux box with sudo — VM, WSL2, or a cloud instance. <strong>Don't use Docker</strong>: loopback mounts and full systemd both behave oddly in containers.</p>
+<pre><code>mkdir -p ~/lab-05
+cd ~/lab-05
+script -q transcript.txt        # start recording everything
+# (run :exit or Ctrl-D when done)</code></pre>
+
+    <h2>Tasks</h2>
+
+    <h3><span class="stepnum">01</span>Look at what's already mounted</h3>
+<pre><code>lsblk                          # block devices
+findmnt                        # tree of mounts
+df -h                          # free space by mount
+cat /etc/fstab                 # what mounts at boot</code></pre>
+    <p>Note the structure: a block device → optional partition → filesystem → mount point.</p>
+
+    <h3><span class="stepnum">02</span>Build a loopback device</h3>
+    <p>A loopback device is a regular file the kernel treats as a block device — perfect for practising without a spare disk.</p>
+<pre><code># 256 MB of zeros, then let the kernel attach a loop device to the file
+sudo dd if=/dev/zero of=/var/disks/lab.img bs=1M count=256 status=progress
+sudo losetup -fP --show /var/disks/lab.img    # prints /dev/loopN (remember it)
+lsblk                                          # the new device should show up</code></pre>
+    <div class="callout">
+      <strong>What just happened —</strong> <code>losetup -fP --show</code> finds the next free loop number (<code>-f</code>), tells the kernel to scan it for partitions (<code>-P</code>), and prints the device path so you can capture it: <code>LOOP=$(sudo losetup -fP --show /var/disks/lab.img)</code>.
+    </div>
+
+    <h3><span class="stepnum">03</span>Format it with a filesystem</h3>
+<pre><code>LOOP=$(sudo losetup -j /var/disks/lab.img | awk -F: '{print $1}')
+echo "$LOOP"                                   # confirm
+
+sudo mkfs.ext4 -L LAB "$LOOP"                  # ext4 with label LAB
+sudo blkid "$LOOP"                             # capture the UUID</code></pre>
+    <p>Copy the UUID printed by <code>blkid</code> — you'll need it in step 5.</p>
+
+    <h3><span class="stepnum">04</span>Mount it manually</h3>
+<pre><code>sudo mkdir -p /mnt/lab
+sudo mount "$LOOP" /mnt/lab
+findmnt /mnt/lab                               # verify
+df -h /mnt/lab                                 # see the free space
+
+# write something
+echo "hello from $(date)" | sudo tee /mnt/lab/hello.txt
+ls -l /mnt/lab</code></pre>
+
+    <h3><span class="stepnum">05</span>Persist the mount via <code>/etc/fstab</code></h3>
+    <p>A device path like <code>/dev/loop0</code> can change across reboots — but a UUID never does. Always mount by UUID in <code>/etc/fstab</code>.</p>
+<pre><code>UUID=$(sudo blkid -s UUID -o value "$LOOP")
+echo "$UUID"
+
+# append the fstab line (verify the exact UUID first!)
+echo "UUID=$UUID  /mnt/lab  ext4  loop,defaults,nofail  0  2" | sudo tee -a /etc/fstab
+
+# remount everything from fstab to verify the line works
+sudo umount /mnt/lab
+sudo mount -a                                  # mount everything in fstab
+findmnt /mnt/lab                               # back, mounted via fstab</code></pre>
+    <div class="callout warn">
+      <strong>The <code>nofail</code> option is important.</strong> Without it, a missing or broken disk on boot drops the system into emergency-mode rescue shell. <code>nofail</code> says "if this mount fails, keep booting." For non-critical disks (everything except root), always use <code>nofail</code>.
+    </div>
+
+    <h3><span class="stepnum">06</span>Write a systemd service</h3>
+    <p>Create <code>/usr/local/bin/lab-tick.sh</code> — the script the service will run:</p>
+<pre><code>sudo tee /usr/local/bin/lab-tick.sh &gt;/dev/null &lt;&lt;'EOF'
+#!/bin/bash
+set -euo pipefail
+echo "[$(date --iso-8601=seconds)] tick on $(hostname)" &gt;&gt; /mnt/lab/tick.log
+EOF
+sudo chmod +x /usr/local/bin/lab-tick.sh
+sudo /usr/local/bin/lab-tick.sh                # smoke-test it
+cat /mnt/lab/tick.log</code></pre>
+    <p>Now write the service unit at <code>/etc/systemd/system/lab-tick.service</code>:</p>
+<pre><code>sudo tee /etc/systemd/system/lab-tick.service &gt;/dev/null &lt;&lt;'EOF'
+[Unit]
+Description=Lab 05 — write one tick into the lab disk
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/lab-tick.sh
+EOF</code></pre>
+
+    <h3><span class="stepnum">07</span>Pair it with a timer</h3>
+    <p>And the timer at <code>/etc/systemd/system/lab-tick.timer</code> — same name, <code>.timer</code> extension. systemd auto-links them.</p>
+<pre><code>sudo tee /etc/systemd/system/lab-tick.timer &gt;/dev/null &lt;&lt;'EOF'
+[Unit]
+Description=Run lab-tick every minute
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=1min
+AccuracySec=1s
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now lab-tick.timer
+systemctl list-timers --all | grep lab-tick     # see when it next fires</code></pre>
+
+    <h3><span class="stepnum">08</span>Watch it fire</h3>
+<pre><code>journalctl -u lab-tick.service -f               # follow it live; Ctrl-C to exit
+# wait ~2 minutes
+cat /mnt/lab/tick.log                           # entries every minute</code></pre>
+
+    <h3><span class="stepnum">09</span>Inspect the unit and recent activity</h3>
+<pre><code>systemctl status lab-tick.service
+systemctl status lab-tick.timer
+systemctl cat lab-tick.service                  # show the unit file the running config came from
+journalctl -u lab-tick.service --since "10 min ago"</code></pre>
+
+    <h3><span class="stepnum">10</span>Clean up <em>(optional but recommended)</em></h3>
+<pre><code>sudo systemctl disable --now lab-tick.timer
+sudo rm /etc/systemd/system/lab-tick.{service,timer}
+sudo systemctl daemon-reload
+
+sudo umount /mnt/lab
+sudo sed -i.bak "/$UUID/d" /etc/fstab           # remove the fstab line
+sudo losetup -d "$LOOP"
+sudo rm /var/disks/lab.img /usr/local/bin/lab-tick.sh
+sudo rmdir /mnt/lab</code></pre>
+
+    <h2>Hints</h2>
+    <ul>
+      <li>Always mount by <strong>UUID</strong> (or <strong>LABEL</strong>) in <code>/etc/fstab</code>, never by device path. Device numbers shift between boots.</li>
+      <li>If <code>mount -a</code> fails, your boot will fail too. Test it before rebooting — that's the whole point of running it manually.</li>
+      <li><code>systemctl daemon-reload</code> is required after editing any unit file. Forget it and you'll see your old config silently in effect.</li>
+      <li>A timer file's name must match its service file — <code>foo.timer</code> triggers <code>foo.service</code> by default. To target a different service, add <code>Unit=other.service</code> under <code>[Timer]</code>.</li>
+      <li><code>Persistent=true</code> tells systemd: if the timer would have fired while the machine was off, run it once at boot to catch up.</li>
+    </ul>
+
+    <h2>Deliverable</h2>
+    <ol>
+      <li><code>~/lab-05/transcript.txt</code> — your full session recording.</li>
+      <li>The exact line you appended to <code>/etc/fstab</code>.</li>
+      <li>The contents of <code>/etc/systemd/system/lab-tick.service</code> and <code>lab-tick.timer</code>.</li>
+      <li>A one-paragraph reflection: <em>Why mount by UUID instead of device path? Why does the timer + service split exist — couldn't cron do the same thing?</em></li>
+    </ol>
+
+    <h2>Stretch</h2>
+    <ul>
+      <li>Change the timer to use a <strong>calendar expression</strong> (<code>OnCalendar=*:0/5</code> — every 5 minutes on the wall clock) instead of <code>OnUnitActiveSec</code>. Verify with <code>systemd-analyze calendar "*:0/5"</code>.</li>
+      <li>Add <code>RandomizedDelaySec=10s</code> under <code>[Timer]</code> and observe the actual fire times scatter.</li>
+      <li>Resize the loopback: stop the timer, <code>truncate -s 512M /var/disks/lab.img</code>, <code>losetup -c "$LOOP"</code>, <code>resize2fs "$LOOP"</code>, remount, verify <code>df -h /mnt/lab</code> shows the new size.</li>
+      <li>Make the service drop the entry under a non-root user. Add <code>User=youruser</code> to <code>[Service]</code> and <code>chown</code> the mount accordingly.</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>Lab 05 — Storage &amp; Services · Course 01</span>
+      <span><a href="../index.html">↩ course home</a></span>
+    </footer>
+  </article>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lab 04 — Permissions &amp; Users — Linux Fundamentals</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../index.html">Academy</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">Course 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">EN</a>
+    <span class="sep">/</span>
+    <span class="here">Lab 04 — Permissions &amp; Users</span>
+    <span class="lang-switch">
+      <a href="lab-04-permissions-and-users.html" class="active">EN</a>
+      <a href="../../he/homework/lab-04-permissions-and-users.html">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">Course 01 · Linux Fundamentals · Homework</div>
+    <h1>Lab 04 — Permissions &amp; Users</h1>
+    <p class="lede">Stand up two real users, put them in a shared group, and use permissions and special bits to make a workspace that just works. Verify everything with <code>ls -l</code>, <code>id</code>, and <code>stat</code>.</p>
+
+    <table class="meta">
+      <tbody>
+        <tr><th>Course</th><td>01 — Linux Fundamentals</td></tr>
+        <tr><th>Time</th><td>~60 minutes</td></tr>
+        <tr><th>Deliverable</th><td><code>~/lab-04/transcript.txt</code> + your <code>/etc/passwd</code> lines for alice &amp; bob + a one-paragraph reflection</td></tr>
+        <tr><th>Maps to slides</th><td>34–36 (Part 04 — Operating the system)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Goal</h2>
+    <p>By the end of this lab you can create users, put them in groups, build a shared directory that automatically gives new files the right group via SGID, set <code>chmod</code> modes for three real-world scenarios, and prove the sticky bit on <code>/tmp</code> works.</p>
+
+    <h2>Setup</h2>
+    <p>You need a real Linux box with sudo access — VM, WSL2, or a cloud instance. <strong>Don't use a Docker container</strong>, because some of these commands modify <code>/etc/passwd</code> and <code>/etc/shadow</code> and the behaviour inside a container is different from a full system.</p>
+<pre><code>mkdir -p ~/lab-04
+cd ~/lab-04
+script -q transcript.txt        # start recording everything you do
+# (run :exit or Ctrl-D when done)</code></pre>
+    <div class="callout">
+      <strong>Tip —</strong> <code>script(1)</code> records your whole session to <code>transcript.txt</code>. Run all the tasks below inside the recording, then exit.
+    </div>
+
+    <h2>Tasks</h2>
+    <p>Work through these in order. Read each line before you press Enter.</p>
+
+    <h3><span class="stepnum">01</span>Look at the current state</h3>
+<pre><code>whoami
+id
+cat /etc/passwd | head -5      # the format: name:x:uid:gid:gecos:home:shell
+cat /etc/group | head -5
+ls -l /etc/shadow              # only root can read</code></pre>
+    <p>You should see your own user in <code>/etc/passwd</code>, and a list of groups you belong to from <code>id</code>.</p>
+
+    <h3><span class="stepnum">02</span>Create two users</h3>
+<pre><code>sudo useradd -m -s /bin/bash alice
+sudo useradd -m -s /bin/bash bob
+sudo passwd alice
+sudo passwd bob
+
+id alice
+getent passwd alice
+ls -ld /home/alice</code></pre>
+    <p>Verify the users exist, have home directories, and were assigned UIDs (probably 1001 and 1002 on a fresh box).</p>
+
+    <h3><span class="stepnum">03</span>Create a shared group</h3>
+<pre><code>sudo groupadd devs
+sudo usermod -aG devs alice
+sudo usermod -aG devs bob
+
+getent group devs              # should list both members
+id alice                       # devs should be in alice's groups</code></pre>
+    <div class="callout warn">
+      <strong>The <code>-a</code> is critical.</strong> <code>usermod -G devs alice</code> (without <code>-a</code>) REPLACES alice's group list with just <code>devs</code> — she loses every other membership, including her primary group's secondaries. Always <code>usermod -aG</code>.
+    </div>
+
+    <h3><span class="stepnum">04</span>Make a shared workspace with SGID</h3>
+<pre><code>sudo mkdir /srv/shared
+sudo chown root:devs /srv/shared
+sudo chmod 2775 /srv/shared        # leading 2 = SGID
+ls -ld /srv/shared                 # mode shows 'rwxrwsr-x' — the 's' is SGID
+stat /srv/shared</code></pre>
+    <p>Now have each user drop a file in:</p>
+<pre><code>sudo -u alice touch /srv/shared/from-alice.txt
+sudo -u bob   touch /srv/shared/from-bob.txt
+ls -l /srv/shared</code></pre>
+    <p>Both files should show group <code>devs</code> — that's SGID at work. Without SGID, each file would have inherited its creator's primary group instead.</p>
+
+    <h3><span class="stepnum">05</span>Three permission scenarios</h3>
+    <p>For each scenario, set the right mode and verify with <code>ls -l</code>.</p>
+    <table>
+      <thead><tr><th>Scenario</th><th>What you want</th><th>Mode</th></tr></thead>
+      <tbody>
+        <tr><td>A script anyone can run</td><td>owner all, others r+x</td><td><code>755</code></td></tr>
+        <tr><td>A config only root can read</td><td>owner r+w only</td><td><code>600</code></td></tr>
+        <tr><td>A log file the <code>devs</code> group can append</td><td>owner+group r+w, others r</td><td><code>664</code></td></tr>
+      </tbody>
+    </table>
+<pre><code># Script anyone can run
+printf '#!/bin/bash\necho "hi from $USER"\n' | sudo tee /usr/local/bin/hi
+sudo chmod 755 /usr/local/bin/hi
+sudo -u alice /usr/local/bin/hi
+
+# Config only root can read
+sudo touch /etc/important.conf
+sudo chmod 600 /etc/important.conf
+ls -l /etc/important.conf
+sudo -u alice cat /etc/important.conf    # should fail with permission denied
+
+# Shared log writable by devs
+sudo touch /srv/shared/devs.log
+sudo chown root:devs /srv/shared/devs.log
+sudo chmod 664 /srv/shared/devs.log
+sudo -u alice sh -c 'echo "alice was here" &gt;&gt; /srv/shared/devs.log'
+sudo -u bob   sh -c 'echo "bob was here"   &gt;&gt; /srv/shared/devs.log'
+cat /srv/shared/devs.log</code></pre>
+
+    <h3><span class="stepnum">06</span>Prove the sticky bit on <code>/tmp</code></h3>
+<pre><code>ls -ld /tmp                                # mode ends with 't' — sticky bit
+sudo -u alice touch /tmp/alice.txt
+sudo -u bob   rm /tmp/alice.txt            # should fail — alice owns it</code></pre>
+    <p>Without the sticky bit, anyone with write on <code>/tmp</code> could delete anyone else's files. With it, only the owner (or root) can delete.</p>
+
+    <h3><span class="stepnum">07</span>Inspect with <code>stat</code></h3>
+<pre><code>stat /srv/shared
+stat /usr/local/bin/hi
+stat /tmp</code></pre>
+    <p><code>stat</code> shows the mode in both octal and symbolic form — useful when you can't remember which is which.</p>
+
+    <h3><span class="stepnum">08</span>Clean up <em>(optional)</em></h3>
+<pre><code>sudo userdel -r alice
+sudo userdel -r bob
+sudo groupdel devs
+sudo rm -rf /srv/shared
+sudo rm -f /etc/important.conf /usr/local/bin/hi</code></pre>
+
+    <h2>Hints</h2>
+    <ul>
+      <li>After adding a user to a group, they need to <strong>log out and back in</strong> for the new group to apply to their session. <code>sudo -u alice ...</code> bypasses this because it spawns a fresh session each time.</li>
+      <li><code>getent passwd alice</code> works even when the user db lives in LDAP or AD, not <code>/etc/passwd</code>. Habit-form it.</li>
+      <li>If <code>chmod 2775</code> looks weird: the leading <code>2</code> is SGID, the <code>775</code> is the usual owner/group/other rwx. <code>4xxx</code> is SUID, <code>1xxx</code> is sticky.</li>
+      <li><code>ls -ld</code> shows the directory itself rather than its contents — useful for inspecting modes on the directory.</li>
+    </ul>
+
+    <h2>Deliverable</h2>
+    <ol>
+      <li><code>~/lab-04/transcript.txt</code> — your full <code>script</code> recording.</li>
+      <li>Your <code>/etc/passwd</code> lines for <code>alice</code> and <code>bob</code> (just those two rows).</li>
+      <li>A one-paragraph reflection: <em>What does the SGID bit on <code>/srv/shared</code> actually buy you? Describe what would go wrong without it.</em></li>
+    </ol>
+
+    <h2>Stretch</h2>
+    <ul>
+      <li>Give alice <strong>passwordless sudo for one specific command</strong> (<code>/usr/local/bin/hi</code>) by dropping a file in <code>/etc/sudoers.d/alice</code>. Test with <code>sudo -n -u alice /usr/local/bin/hi</code>.</li>
+      <li>Use <code>setfacl</code> to grant <strong>bob alone</strong> (not the whole <code>devs</code> group) write access to a file. Verify with <code>getfacl</code>.</li>
+      <li>Set a default ACL on <code>/srv/shared</code> so that every new file is group-writable by <code>devs</code> regardless of umask: <code>setfacl -d -m g:devs:rw /srv/shared</code>.</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>Lab 04 — Permissions &amp; Users · Course 01</span>
+      <span><a href="../index.html">↩ course home</a></span>
+    </footer>
+  </article>
+</body>
+</html>

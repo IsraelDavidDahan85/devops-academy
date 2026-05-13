@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>קורס 01 — יסודות לינוקס</title>
+  <link rel="stylesheet" href="../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../he/index.html">אקדמיה</a>
+    <span class="sep">/</span>
+    <a href="../index.html">קורס 01</a>
+    <span class="sep">/</span>
+    <span class="here">עברית</span>
+    <span class="lang-switch">
+      <a href="../en/index.html">EN</a>
+      <a href="index.html" class="active">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">קורס 01 · DevOps Academy</div>
+    <h1>יסודות לינוקס</h1>
+    <p class="lede">הקורס המעשי הראשון בתוכנית. סטודנטים עוברים מ"מעולם לא פתחתי טרמינל" ל"אני יכול להקים, להפעיל ולנפות שגיאות במכונת לינוקס לבד" — מכסים את ה-shell, שדרוגי shell, את המערכת שמתחת, ואת עבודת התפעול היומיומית של מכונה.</p>
+
+    <h2>חומרי לימוד</h2>
+    <div class="linklist">
+      <a class="row" href="syllabus.html">
+        <span class="key">סילבוס</span>
+        <span class="desc">משך, דרישות קדם, תוצרי למידה, לוח זמנים, הערכה.</span>
+        <span class="meta">html</span>
+      </a>
+      <a class="row" href="http://localhost:5173/s/linux-fundamentals" target="_blank" rel="noopener">
+        <span class="key">מצגת ↗</span>
+        <span class="desc">45 שקופיות — shell · שדרוגים · מתחת למכסה המנוע · תפעול המערכת. דורש <code>pnpm dev</code> פעיל.</span>
+        <span class="meta">localhost:5173</span>
+      </a>
+      <a class="row" href="docs/cheat-sheet.html">
+        <span class="key">דף עזר</span>
+        <span class="desc">הפניה להדפסה המכסה כל פקודה במצגת.</span>
+        <span class="meta">html · להדפסה</span>
+      </a>
+      <a class="row" href="docs/guide.html">
+        <span class="key">מדריך</span>
+        <span class="desc">מסמך מלווה ארוך — כל מושג מהמצגת מוסבר בפרוזה. חלק 01 כתוב; שאר החלקים כרגע במתכונת שלד.</span>
+        <span class="meta">html · קריאה</span>
+      </a>
+    </div>
+
+    <h2>שיעורי בית</h2>
+    <div class="linklist">
+      <a class="row" href="homework/lab-01-cli-tour.html">
+        <span class="key">מעבדה 01 — סיור CLI</span>
+        <span class="desc">סיור מודרך ב-shell: ניווט, יצירה, צפייה, העתקה וניקיון.</span>
+        <span class="meta">~45 דק׳</span>
+      </a>
+      <a class="row" href="homework/lab-02-pipes-and-path.html">
+        <span class="key">מעבדה 02 — Pipes ו-PATH</span>
+        <span class="desc">הרכבת פקודות עם pipes ו-globs; שינוי <code>PATH</code>.</span>
+        <span class="meta">~45 דק׳</span>
+      </a>
+      <a class="row" href="homework/lab-03-boot-and-fhs.html">
+        <span class="key">מעבדה 03 — Boot ו-FHS</span>
+        <span class="desc">בדיקת לוח הזמנים של ה-boot, רשימת שירותי systemd, סיור ב-FHS.</span>
+        <span class="meta">כשעה</span>
+      </a>
+      <a class="row" href="homework/lab-04-permissions-and-users.html">
+        <span class="key">מעבדה 04 — הרשאות ומשתמשים</span>
+        <span class="desc">יצירת משתמשים, הקמת קבוצה משותפת עם SGID, התנסות עם SUID/sticky, תרחישי <code>chmod</code>.</span>
+        <span class="meta">כשעה</span>
+      </a>
+      <a class="row" href="homework/lab-05-storage-and-services.html">
+        <span class="key">מעבדה 05 — אחסון ושירותים</span>
+        <span class="desc">בניית loopback device, פורמט ו-mount, שמירה ב-<code>/etc/fstab</code>, כתיבת <code>.service</code> + <code>.timer</code>.</span>
+        <span class="meta">~75 דק׳</span>
+      </a>
+    </div>
+
+    <h2>פרויקט גמר</h2>
+    <div class="linklist">
+      <a class="row" href="final/project.html">
+        <span class="key">להפוך מכונת לינוקס לשלכם</span>
+        <span class="desc">להקים VM לינוקס חדש, להתאים אותו מקצה לקצה (PS1, aliases, PATH, ~/bin), להוסיף משתמש לא-root, למאונט volume, לפרוס שירות systemd, לתעד את ה-boot, להגיש כריפו Git.</span>
+        <span class="meta">3–5 שעות</span>
+      </a>
+    </div>
+
+    <h2>דרישות קדם</h2>
+    <ul>
+      <li>קורס 00 — מבוא ל-DevOps (מומלץ, לא חובה).</li>
+      <li>סביבת לינוקס עובדת: VM, WSL2, ענן, או טרמינל ב-macOS (עם הסתייגויות — חלק מהנתיבים שונים).</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>קורס 01 — יסודות לינוקס · DevOps Academy</span>
+      <span><a href="../../../he/index.html">↩ דף הבית של האקדמיה</a></span>
+    </footer>
+  </article>
+</body>
+</html>

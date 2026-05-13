@@ -1,0 +1,96 @@
+<!doctype html>
+<!--
+  English course landing page template. Copy into courses/<NN-id>/en/index.html.
+  For Hebrew, copy into courses/<NN-id>/he/index.html, change html lang/dir,
+  and translate everything.
+
+  At three levels of nesting → ../../../assets/styles.css
+
+  Sections to fill:
+    - <title>, eyebrow, h1, lede
+    - site-nav breadcrumbs + lang-switch
+    - "Materials" linklist  -> syllabus, slides symlink (../slides/), cheat sheet
+    - "Homework" linklist   -> one row per lab (link each by name; dim planned ones)
+    - "Final project" linklist (omit section if course has no final)
+    - "Prerequisites" ul
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Course NN &mdash; &lt;Course title&gt;</title>
+  <link rel="stylesheet" href="../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../index.html">Academy</a>
+    <span class="sep">/</span>
+    <a href="../index.html">Course NN</a>
+    <span class="sep">/</span>
+    <span class="here">English</span>
+    <span class="lang-switch">
+      <a href="index.html" class="active">EN</a>
+      <a href="../he/index.html">&#1506;&#1489;&#1512;&#1497;&#1514;</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">Course NN &middot; DevOps Academy</div>
+    <h1>&lt;Course title&gt;</h1>
+    <p class="lede">&lt;One-paragraph elevator pitch: what this course teaches and who it's for.&gt;</p>
+
+    <h2>Materials</h2>
+    <div class="linklist">
+      <a class="row" href="syllabus.html">
+        <span class="key">Syllabus</span>
+        <span class="desc">Duration, prerequisites, outcomes, schedule, assessment.</span>
+        <span class="meta">html</span>
+      </a>
+      <a class="row" href="../slides/">
+        <span class="key">Slides</span>
+        <span class="desc">&lt;Page count + one-line summary of the deck&gt;.</span>
+        <span class="meta">/s/&lt;slide-id&gt;</span>
+      </a>
+      <a class="row" href="docs/cheat-sheet.html">
+        <span class="key">Cheat sheet</span>
+        <span class="desc">Printable reference covering every command in the deck.</span>
+        <span class="meta">html &middot; print</span>
+      </a>
+    </div>
+
+    <h2>Homework</h2>
+    <div class="linklist">
+      <a class="row" href="homework/lab-01-&lt;topic&gt;.html">
+        <span class="key">Lab 01 &mdash; &lt;Title&gt;</span>
+        <span class="desc">&lt;One-line summary.&gt;</span>
+        <span class="meta">~&lt;time&gt;</span>
+      </a>
+      <span class="row dim">
+        <span class="key">Lab 02 &mdash; &lt;Title&gt;</span>
+        <span class="desc">&lt;One-line summary.&gt;</span>
+        <span class="meta">planned</span>
+      </span>
+    </div>
+
+    <h2>Final project</h2>
+    <div class="linklist">
+      <a class="row" href="final/project.html">
+        <span class="key">project.html</span>
+        <span class="desc">&lt;One-line summary of the final project.&gt;</span>
+        <span class="meta">~&lt;time&gt;</span>
+      </a>
+    </div>
+
+    <h2>Prerequisites</h2>
+    <ul>
+      <li>&lt;Course MM &mdash; Title&gt; <em>(if any)</em></li>
+      <li>&lt;Tools / accounts / environments needed&gt;</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>Course NN &mdash; &lt;Course title&gt; &middot; DevOps Academy</span>
+      <span><a href="../../../index.html">&#8617; academy home</a></span>
+    </footer>
+  </article>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>מעבדה 02 — Pipes ו-PATH — יסודות לינוקס</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../he/index.html">אקדמיה</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">קורס 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">עברית</a>
+    <span class="sep">/</span>
+    <span class="here">מעבדה 02 — Pipes ו-PATH</span>
+    <span class="lang-switch">
+      <a href="../../en/homework/lab-02-pipes-and-path.html">EN</a>
+      <a href="lab-02-pipes-and-path.html" class="active">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">קורס 01 · יסודות לינוקס · שיעורי בית</div>
+    <h1>מעבדה 02 — Pipes ו-PATH</h1>
+    <p class="lede">להרכיב פקודות עם pipes, הפניות ו-globbing — ואז לשלוט איפה ה-shell מוצא תוכניות על ידי עריכת <code>$PATH</code>.</p>
+
+    <table class="meta">
+      <tbody>
+        <tr><th>קורס</th><td>01 — יסודות לינוקס</td></tr>
+        <tr><th>זמן</th><td>כ-45 דקות</td></tr>
+        <tr><th>תוצר</th><td><code>~/lab-02/transcript.txt</code> + <code>~/bin/greet</code> (סקריפט מותאם על ה-PATH) + רפלקציה של פסקה אחת</td></tr>
+        <tr><th>תואם למצגת</th><td>שקופיות 14–16 (Pipes ו-globs · PATH · Prompt)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>מטרה</h2>
+    <p>להפסיק להתייחס לפקודות ככלים מבודדים. ללמוד <em>להרכיב</em> — להעביר את הפלט של פקודה אחת לקלט של אחרת, להפנות זרמים לקבצים, ולהשתמש בתווי wildcard כדי לפעול על הרבה קבצים בו-זמנית. ואז לקחת שליטה על הסביבה שלכם דרך עריכת <code>$PATH</code> כדי שה-shell ימצא את הסקריפטים שלכם.</p>
+
+    <h2>הכנה</h2>
+    <p>טרמינל לינוקס (VM, WSL, ענן או macOS — רוב הדגלים תואמים). ודאו שאתם בבית:</p>
+<pre><code>cd ~
+pwd</code></pre>
+    <p>צרו סביבת עבודה למעבדה הזו:</p>
+<pre><code>mkdir -p ~/lab-02/{logs,reports}
+cd ~/lab-02</code></pre>
+
+    <h2>משימות</h2>
+
+    <h3><span class="stepnum">01</span>בדיקת <code>$PATH</code></h3>
+    <p>לפני שתשנו את <code>$PATH</code>, תסתכלו מה כבר שם.</p>
+<pre><code>echo $PATH
+echo $PATH | tr ':' '\n'      # תיקייה אחת בכל שורה
+which ls
+which python3 || echo "אין python3 ב-PATH"
+type cd                       # builtin? alias? קובץ?</code></pre>
+    <blockquote>איזו תיקייה היא הראשונה ב-<code>$PATH</code> שלכם? כשאתם מקלידים <code>ls</code>, למה <code>/usr/bin/ls</code> רץ ולא <code>/bin/ls</code>?</blockquote>
+
+    <h3><span class="stepnum">02</span>Globbing — תווי wildcard</h3>
+    <p>צרו כמה קבצים להתנסות:</p>
+<pre><code>cd ~/lab-02
+touch alpha.txt beta.txt gamma.txt readme.md
+touch logs/{2024-01,2024-02,2024-03}.log</code></pre>
+    <p>נסו כל wildcard:</p>
+<pre><code>ls *.txt                # כל קבצי .txt
+ls *.md                 # כל קבצי .md
+ls logs/*.log           # כל קבצי .log ב-logs/
+ls logs/2024-0?.log     # ? = תו אחד בדיוק
+ls [ab]*.txt            # מתחיל ב-a או b
+ls [!a]*.txt            # לא מתחיל ב-a</code></pre>
+
+    <h3><span class="stepnum">03</span>הפניות — &gt; · &gt;&gt; · 2&gt;</h3>
+    <p>זרמים: stdout (1), stderr (2). הפנו אותם בנפרד.</p>
+<pre><code>ls -la           &gt;  reports/listing.txt    # stdout דריסה
+date             &gt;&gt; reports/listing.txt    # stdout הוספה
+ls /nope         2&gt; reports/errors.txt     # stderr לקובץ
+ls / /nope       &gt;  reports/mixed.txt 2&gt;&amp;1  # שניהם לאותו קובץ
+cat reports/listing.txt</code></pre>
+    <blockquote>מה יש ב-<code>reports/errors.txt</code>? מה ההבדל בין <code>2&gt;</code> ל-<code>&gt;</code>?</blockquote>
+
+    <h3><span class="stepnum">04</span>Pipes — הרכבת פקודות</h3>
+    <p>ה-pipe (<code>|</code>) שולח את stdout של הפקודה השמאלית כ-stdin לימנית. קראו כל דוגמה והריצו:</p>
+<pre><code># ספרו כמה קבצי .log יש ב-/var/log
+ls /var/log/*.log 2&gt;/dev/null | wc -l
+
+# 5 הקבצים הגדולים ב-/etc
+ls -lS /etc 2&gt;/dev/null | head -n 6
+
+# מי שמריץ bash עכשיו
+ps aux | grep bash | grep -v grep
+
+# Shells ייחודיים על המערכת
+cat /etc/passwd | cut -d: -f7 | sort -u</code></pre>
+
+    <h3><span class="stepnum">05</span>בנו pipeline משלכם</h3>
+    <p>שלבו pipes + globs + הפניות. שמרו את הפלט לקובץ.</p>
+<pre><code># ספרו שורות error בכל הלוגים של המעבדה
+echo "error_1" &gt;  logs/2024-01.log
+echo "info"    &gt;&gt; logs/2024-01.log
+echo "error_2" &gt;  logs/2024-02.log
+echo "ERROR_3" &gt;  logs/2024-03.log
+
+cat logs/*.log | grep -i "error" | sort -u &gt; reports/all-errors.txt
+cat reports/all-errors.txt
+wc -l reports/all-errors.txt</code></pre>
+
+    <h3><span class="stepnum">06</span>צרו פקודה משלכם, הוסיפו ל-<code>$PATH</code></h3>
+    <p>צרו סקריפט קצר שמברך לפי שם.</p>
+<pre><code>mkdir -p ~/bin
+cat &gt; ~/bin/greet &lt;&lt;'EOF'
+#!/usr/bin/env bash
+name="${1:-friend}"
+echo "Hello, $name. Welcome to lab-02."
+EOF
+chmod +x ~/bin/greet</code></pre>
+    <p>נסו להריץ. עדיין לא יעבוד:</p>
+<pre><code>greet world
+# bash: greet: command not found</code></pre>
+    <p>זה כי <code>~/bin</code> לא ב-<code>$PATH</code>. הוסיפו לסשן הזה:</p>
+<pre><code>export PATH="$HOME/bin:$PATH"
+echo $PATH | head -c 60        # ודאו ש-~/bin ראשון
+greet world                    # → Hello, world. ...</code></pre>
+
+    <h3><span class="stepnum">07</span>קיבעו את השינוי</h3>
+    <p><code>export</code> חי רק לסשן הנוכחי. כדי להפוך אותו לקבוע:</p>
+<pre><code># משתמשי bash:
+echo 'export PATH="$HOME/bin:$PATH"' &gt;&gt; ~/.bashrc
+
+# משתמשי zsh:
+echo 'export PATH="$HOME/bin:$PATH"' &gt;&gt; ~/.zshrc
+
+# טעינה מחדש בלי לצאת:
+source ~/.bashrc   # או source ~/.zshrc</code></pre>
+    <p>פתחו טרמינל חדש והקלידו <code>greet $(whoami)</code> — אמור לעבוד בלי export מחדש.</p>
+
+    <h3><span class="stepnum">08</span>שמירת העבודה</h3>
+<pre><code>cd ~/lab-02
+history | tail -n 100 &gt; transcript.txt
+ls -laR ~/lab-02 ~/bin/greet &gt;&gt; transcript.txt
+echo "--- PATH ---"          &gt;&gt; transcript.txt
+echo $PATH                    &gt;&gt; transcript.txt</code></pre>
+
+    <h2>טיפים</h2>
+    <ul>
+      <li><strong><code>2&gt;/dev/null</code></strong> משתיק את stderr — שימושי כשפקודה ממלאת את המסך ב-"Permission denied" עבור קבצים שלא מעניינים אתכם.</li>
+      <li><strong><code>&amp;&gt;</code></strong> ב-bash מפנה גם stdout וגם stderr בו-זמנית. פחות הקלדה מאשר <code>&gt; file 2&gt;&amp;1</code>.</li>
+      <li><strong><code>type &lt;cmd&gt;</code></strong> אומר לכם אם פקודה היא binary ב-PATH, alias, builtin של shell, או פונקציה. שלפו אותו כש"מאיפה זה בא?" חשוב.</li>
+      <li><strong>קבצי rc של shell:</strong> bash קורא <code>~/.bashrc</code> ל-interactive shells, <code>~/.bash_profile</code> ל-login shells; zsh קורא <code>~/.zshrc</code>. אם השינויים לא תופסים, ייתכן שאתם עורכים את הקובץ הלא נכון.</li>
+      <li><strong>סדר חשוב ב-<code>$PATH</code>:</strong> התיקייה הראשונה שמתאימה זוכה. שימו <code>~/bin</code> בהתחלה כדי לדרוס פקודות מערכת.</li>
+    </ul>
+
+    <h2>תוצר</h2>
+    <p>הגישו:</p>
+    <ol>
+      <li><code>~/lab-02/transcript.txt</code> — היסטוריית הפקודות + ls + dump של PATH.</li>
+      <li><code>~/bin/greet</code> — הסקריפט שלכם (שורה אחת של "יצרתי את זה" מספיקה כתוצר).</li>
+      <li>השורה המדויקת שהוספתם ל-<code>~/.bashrc</code> או <code>~/.zshrc</code>.</li>
+      <li>רפלקציה של פסקה אחת: איזו טכניקת הרכבה (pipe מול redirect מול glob) הרגישה הכי טבעית, ומה הפתיע אתכם?</li>
+    </ol>
+
+    <h2>אתגרים (אופציונלי)</h2>
+    <ul>
+      <li><strong>אתגר one-liner:</strong> באמצעות pipeline אחד בלבד (בלי קבצים זמניים), הדפיסו את 3 ה-shells הכי נפוצים במערכת.</li>
+      <li><strong>ארכיאולוגיית PATH:</strong> עבור כל תיקייה ב-<code>$PATH</code>, ספרו כמה executables היא מכילה. רמז: <code>ls -la &lt;dir&gt; | wc -l</code> בלולאה, או <code>find &lt;dir&gt; -maxdepth 1 -executable</code>.</li>
+      <li><strong>tee:</strong> השתמשו ב-<code>tee</code> כדי לכתוב פלט של pipeline לקובץ <em>וגם</em> ל-stdout בו-זמנית. שלבו עם ה-pipeline של errors ממשימה 05.</li>
+      <li><strong>וריאציות shebang:</strong> שכתבו את <code>greet</code> עם <code>#!/bin/sh</code>. האם משהו נשבר? למה?</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>קורס 01 — יסודות לינוקס · מעבדה 02</span>
+      <span><a href="../index.html">↩ דף הקורס</a></span>
+    </footer>
+  </article>
+</body>
+</html>

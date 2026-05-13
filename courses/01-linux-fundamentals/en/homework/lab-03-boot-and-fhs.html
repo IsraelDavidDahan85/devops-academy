@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lab 03 — Boot &amp; FHS — Linux Fundamentals</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../index.html">Academy</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">Course 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">EN</a>
+    <span class="sep">/</span>
+    <span class="here">Lab 03 — Boot &amp; FHS</span>
+    <span class="lang-switch">
+      <a href="lab-03-boot-and-fhs.html" class="active">EN</a>
+      <a href="../../he/homework/lab-03-boot-and-fhs.html">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">Course 01 · Linux Fundamentals · Homework</div>
+    <h1>Lab 03 — Boot &amp; FHS</h1>
+    <p class="lede">Look under the hood — trace the boot timeline with <code>dmesg</code> and <code>journalctl</code>, inspect <code>systemd</code> targets and services, identify all seven Linux file types, and walk the FHS top-level directories.</p>
+
+    <table class="meta">
+      <tbody>
+        <tr><th>Course</th><td>01 — Linux Fundamentals</td></tr>
+        <tr><th>Time</th><td>~60 minutes</td></tr>
+        <tr><th>Deliverable</th><td><code>~/lab-03/transcript.txt</code> + <code>~/lab-03/boot-timeline.md</code> + a one-paragraph reflection</td></tr>
+        <tr><th>Maps to slides</th><td>20–22 (Boot process · systemd targets · File types &amp; FHS)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <strong>macOS heads-up —</strong> this lab requires a real Linux system. Most commands here (<code>journalctl</code>, <code>systemctl</code>, <code>/proc</code>) don't exist on macOS. Use a VM, WSL2, or SSH into a cloud Linux box.
+    </div>
+
+    <h2>Goal</h2>
+    <p>Stop seeing the operating system as a black box. By the end of this lab you should be able to: trace what happens between power-on and login shell; identify what's running and why; tell a regular file from a device, socket, or named pipe at a glance; and navigate any unfamiliar Linux filesystem by purpose rather than memory.</p>
+
+    <h2>Setup</h2>
+    <p>A real Linux environment with <code>systemd</code> (Ubuntu, Debian, Fedora, Arch — almost everything modern). Confirm:</p>
+<pre><code>uname -a               # kernel + arch
+cat /etc/os-release    # distro identity
+systemctl --version    # confirm systemd is the init system</code></pre>
+    <p>Create a workspace for this lab:</p>
+<pre><code>mkdir -p ~/lab-03
+cd ~/lab-03</code></pre>
+
+    <h2>Tasks</h2>
+
+    <h3><span class="stepnum">01</span>The kernel's own logs</h3>
+    <p><code>dmesg</code> prints the kernel ring buffer — what the kernel itself logged from power-on. On some distros it needs <code>sudo</code>.</p>
+<pre><code>dmesg | head -n 20          # the very first lines after boot
+dmesg | tail -n 20          # most recent kernel events
+dmesg | grep -i "usb"       # what USB devices the kernel saw
+dmesg | grep -i "ext4\|xfs\|btrfs"   # filesystem mounts</code></pre>
+    <blockquote>What's the FIRST thing your kernel logged after boot? What CPU did it detect?</blockquote>
+
+    <h3><span class="stepnum">02</span>The journal from this boot</h3>
+    <p><code>journalctl</code> is systemd's unified log. <code>-b</code> = current boot, <code>-b -1</code> = previous boot.</p>
+<pre><code>journalctl -b | head -n 30         # boot from the start
+journalctl -b --no-pager | wc -l   # how many log lines this boot
+journalctl -b -p err               # only errors
+journalctl --list-boots            # every recorded boot
+journalctl _PID=1 -b | head -n 20  # only what PID 1 (systemd) said</code></pre>
+
+    <h3><span class="stepnum">03</span>systemd targets and services</h3>
+    <p>Targets are named groups of services. Services are units that <code>systemd</code> manages.</p>
+<pre><code>systemctl get-default                       # multi-user.target? graphical.target?
+systemctl list-units --type=target          # all active targets
+systemctl list-units --type=service --state=running | head -n 20
+systemctl list-units --failed               # anything broken?
+systemctl status                             # the big-picture tree</code></pre>
+    <p>Pick one service that's running on your box (e.g. <code>ssh.service</code>, <code>cron.service</code>, <code>NetworkManager.service</code>) and inspect it:</p>
+<pre><code>systemctl status &lt;service&gt;.service
+systemctl cat &lt;service&gt;.service              # the unit file itself
+journalctl -u &lt;service&gt;.service -n 30        # its logs</code></pre>
+
+    <h3><span class="stepnum">04</span>Identify all seven file types</h3>
+    <p>The first character of <code>ls -l</code> tells you what kind of file you're looking at: <code>-</code> regular, <code>d</code> dir, <code>l</code> symlink, <code>c</code> char device, <code>b</code> block device, <code>p</code> named pipe, <code>s</code> socket.</p>
+    <p>Find one example of each:</p>
+<pre><code>ls -l /etc/hosts                       # -    regular file
+ls -ld /var/log                        # d    directory
+ls -l /bin                             # l    symlink (on many distros /bin → /usr/bin)
+ls -l /dev/tty                         # c    character device
+ls -l /dev/sda 2>/dev/null || ls -l /dev/disk0   # b    block device
+ls -l /dev/log 2>/dev/null || find /run -type p 2>/dev/null | head -n1 | xargs -I{} ls -l {}
+ls -l /var/run/docker.sock 2>/dev/null || find /run -type s 2>/dev/null | head -n1 | xargs -I{} ls -l {}</code></pre>
+    <blockquote>Record one example of each type — paste them into a section of <code>boot-timeline.md</code> later.</blockquote>
+
+    <h3><span class="stepnum">05</span>FHS — a walking tour</h3>
+    <p>Visit each top-level directory and look at one telling thing.</p>
+<pre><code>ls /                       # the whole top
+ls /bin | wc -l            # how many user binaries
+ls /sbin | head            # system admin binaries
+cat /etc/os-release        # /etc = configuration
+ls /home                   # one folder per user
+ls /var/log | head         # /var = variable data (mostly logs)
+ls /usr/share | head       # /usr = installed software, read-only
+ls /tmp                    # /tmp = scratch (wiped on reboot, usually)
+cat /proc/cpuinfo | head   # /proc = live kernel view
+cat /proc/meminfo | head
+ls /sys/class | head       # /sys = kernel objects (devices, modules)
+ls /dev | head             # /dev = device nodes</code></pre>
+
+    <h3><span class="stepnum">06</span>Peek at PID 1</h3>
+    <p>Every Linux process descends from PID 1. On systemd boxes, that's <code>systemd</code> itself.</p>
+<pre><code>ps -p 1 -o pid,comm,args
+ls -la /proc/1/exe         # symlink to the running binary
+cat /proc/1/cmdline | tr '\0' ' '; echo  # how it was invoked
+ls /proc/1/fd | head       # file descriptors PID 1 has open</code></pre>
+
+    <h3><span class="stepnum">07</span>Write your boot timeline</h3>
+    <p>Open <code>~/lab-03/boot-timeline.md</code> in your editor and write a short narrative: <em>"On my machine, here's what happened between power and login."</em> Use the actual evidence you gathered.</p>
+<pre><code># start the file with a template:
+cat &gt; ~/lab-03/boot-timeline.md &lt;&lt;'EOF'
+# Boot timeline — observed on my box
+
+## 1. Firmware
+- (from `cat /sys/firmware/efi/...` or BIOS): ...
+
+## 2. Bootloader
+- (from your distro — GRUB? systemd-boot?): ...
+
+## 3. Kernel
+- Version: (from `uname -r`):
+- First dmesg line: ...
+
+## 4. initrd / initramfs
+- Mounted at boot, hands off to the real root: ...
+
+## 5. systemd as PID 1
+- Default target: (from `systemctl get-default`):
+- Number of active services: ...
+
+## 6. Login shell
+- Default shell: (from `echo $SHELL`):
+
+## Seven file types I found
+- `-` regular: ...
+- `d` directory: ...
+- `l` symlink: ...
+- `c` char device: ...
+- `b` block device: ...
+- `p` named pipe: ...
+- `s` socket: ...
+EOF</code></pre>
+    <p>Fill in the actual values from your machine.</p>
+
+    <h3><span class="stepnum">08</span>Capture your work</h3>
+<pre><code>cd ~/lab-03
+history | tail -n 150 &gt; transcript.txt
+{
+  echo "=== uname ===";        uname -a
+  echo "=== os-release ===";   cat /etc/os-release
+  echo "=== default target ==="; systemctl get-default
+  echo "=== failed units ==="; systemctl list-units --failed
+} &gt;&gt; transcript.txt</code></pre>
+
+    <h2>Hints</h2>
+    <ul>
+      <li><strong><code>journalctl -f</code></strong> follows new log entries live — like <code>tail -f</code> for the system journal. Useful for watching what happens when you start/stop services in another terminal.</li>
+      <li><strong>Don't <code>isolate</code> a target casually.</strong> <code>systemctl isolate rescue.target</code> kicks every other service offline — fine on a personal VM, bad over SSH to a server you care about.</li>
+      <li><strong><code>/proc</code> is fake.</strong> Files there aren't on disk — they're a live view into kernel data. That's why <code>cat /proc/cpuinfo</code> always shows current info.</li>
+      <li><strong>The <code>l</code> file type is everywhere.</strong> Many distros have <code>/bin</code>, <code>/sbin</code>, <code>/lib</code> as symlinks into <code>/usr</code>. The "usrmerge" world.</li>
+      <li><strong>If a command needs <code>sudo</code> and you don't have it,</strong> note that in your transcript ("dmesg requires sudo on Ubuntu &gt;= 23"). The lab still counts.</li>
+    </ul>
+
+    <h2>Deliverable</h2>
+    <p>Submit:</p>
+    <ol>
+      <li><code>~/lab-03/transcript.txt</code> — your command history + uname + os-release + default target + failed units.</li>
+      <li><code>~/lab-03/boot-timeline.md</code> — your filled-in narrative of the six boot phases plus your seven file-type examples.</li>
+      <li>A one-paragraph reflection: which step changed your mental model of "what an OS is"?</li>
+    </ol>
+
+    <h2>Stretch (optional)</h2>
+    <ul>
+      <li><strong>Service dependency tree:</strong> run <code>systemctl list-dependencies multi-user.target</code> (or whatever your default target is). What's at the root?</li>
+      <li><strong>Boot time:</strong> <code>systemd-analyze</code> tells you how long boot took. <code>systemd-analyze blame</code> ranks services by startup time. Which service is slowest on your box?</li>
+      <li><strong>Bind mounts in <code>/proc</code>:</strong> compare <code>cat /proc/self/mounts</code> with <code>mount</code> output. What's different?</li>
+      <li><strong>Write your own systemd unit</strong> (don't enable it). Drop a <code>.service</code> file in <code>~/.config/systemd/user/</code> that runs <code>echo hello &gt;&gt; ~/lab-03/hello.log</code>. Run it with <code>systemctl --user start &lt;name&gt;.service</code>. Read its journal.</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>Course 01 — Linux Fundamentals · Lab 03</span>
+      <span><a href="../index.html">↩ course home</a></span>
+    </footer>
+  </article>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Final Project — Linux Fundamentals</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../index.html">Academy</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">Course 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">EN</a>
+    <span class="sep">/</span>
+    <span class="here">Final project</span>
+    <span class="lang-switch">
+      <a href="project.html" class="active">EN</a>
+      <a href="../../he/final/project.html">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">Course 01 · Linux Fundamentals · Final</div>
+    <h1>Final Project — Make a Linux Box Yours</h1>
+    <p class="lede">Provision a fresh Linux machine, customize it end-to-end, and document what's happening underneath. The capstone that ties together every lab in this course.</p>
+
+    <table class="meta">
+      <tbody>
+        <tr><th>Course</th><td>01 — Linux Fundamentals</td></tr>
+        <tr><th>Time</th><td>3–5 hours (spread across a few sittings)</td></tr>
+        <tr><th>Deliverable</th><td>A Git repo (or <code>.tar.gz</code>) containing: <code>README.md</code>, <code>boot.md</code>, <code>system-report.txt</code>, <code>users.md</code>, <code>storage.md</code>, <code>dotfiles/</code>, <code>bin/</code>, <code>systemd/</code></td></tr>
+        <tr><th>Format</th><td>Push to GitHub (preferred) — submit the repo URL — or archive and submit as a file.</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Capability demonstrated</h2>
+    <p>You can sit down at a fresh, unfamiliar Linux box and within an hour have it set up the way you work — with a prompt you can read, aliases that match your habits, a working <code>$PATH</code> that includes your own scripts, and a clear-eyed understanding of what the machine actually <em>did</em> between power-on and login.</p>
+    <p>This is the difference between "I can run commands" and "this machine is mine."</p>
+
+    <h2>The brief</h2>
+    <p>You're handed a fresh Linux VM. It boots straight to a default shell with default colors, no aliases, no custom scripts, no story. Your job: <strong>make it yours</strong>, and document both what you did and what the machine looked like underneath.</p>
+    <p>This is exactly what every engineer does on a new laptop or every time they provision a server. Practising it deliberately, once, makes the rest of your career on Linux faster.</p>
+
+    <h2>Requirements</h2>
+
+    <h3>1 · Provision a real Linux machine</h3>
+    <p>Any of these works:</p>
+    <ul>
+      <li>A local VM (multipass, UTM, VirtualBox, Lima, VMware) running Ubuntu, Debian, Fedora, Arch, or similar — anything with <code>systemd</code>.</li>
+      <li>A cloud VM (DigitalOcean droplet, AWS EC2, GCP Compute, Linode, Hetzner — even the free tier).</li>
+      <li>WSL2 on Windows (works, but the boot section will be unusual — note that in <code>boot.md</code>).</li>
+    </ul>
+    <p>It must be <strong>fresh</strong>. Don't reuse your existing dotfiles or your daily-driver machine.</p>
+
+    <h3>2 · Customize the shell environment</h3>
+    <p>In your shell's rc file (<code>~/.bashrc</code> or <code>~/.zshrc</code>), set up:</p>
+    <ul>
+      <li><strong>At least 3 aliases</strong> that you'd actually use day-to-day. Examples: <code>ll='ls -lah'</code>, <code>gs='git status'</code>, <code>..='cd ..'</code>. No copying generic lists — pick ones that match how you think.</li>
+      <li><strong>A custom <code>PS1</code></strong> that shows at least username, hostname, and working directory. Bonus: add color, add the current git branch.</li>
+      <li><strong>An updated <code>$PATH</code></strong> that includes <code>~/bin</code> (at the front, so your scripts win over system commands of the same name).</li>
+    </ul>
+    <p>Aliases / PS1 / PATH must <strong>survive a new shell</strong> — the test is: close the terminal, reopen it, alias still works without re-running anything.</p>
+
+    <h3>3 · Write at least one script in <code>~/bin</code></h3>
+    <p>Any script you'll actually use. Examples:</p>
+    <ul>
+      <li><code>up</code> — runs <code>apt update &amp;&amp; apt upgrade</code> (or your distro equivalent) with sudo.</li>
+      <li><code>weather</code> — <code>curl wttr.in/Tel-Aviv</code> or similar.</li>
+      <li><code>backup-notes</code> — rsyncs <code>~/notes</code> to a backup dir with a timestamp.</li>
+      <li><code>greet</code> — the lab-02 script, kept.</li>
+    </ul>
+    <p>The script must be executable (<code>chmod +x</code>), have a shebang (<code>#!/usr/bin/env bash</code>), and run from <strong>any directory</strong> (proving your <code>$PATH</code> setup works).</p>
+
+    <h3>4 · Write <code>boot.md</code> — your machine's boot story</h3>
+    <p>Document the actual boot sequence as observed on YOUR VM. Use lab-03's template as a starting point, but every value must be from your machine.</p>
+    <p>Cover at minimum:</p>
+    <ul>
+      <li>Firmware/bootloader your distro uses (BIOS/UEFI, GRUB/systemd-boot).</li>
+      <li>Kernel version (from <code>uname -r</code>) and the first 5 lines of <code>dmesg</code>.</li>
+      <li>The default systemd target on your box, plus 3 services that started during boot (use <code>systemctl list-units --type=service</code>).</li>
+      <li>One example for each of the 7 file types (<code>-</code>, <code>d</code>, <code>l</code>, <code>c</code>, <code>b</code>, <code>p</code>, <code>s</code>) — full <code>ls -l</code> output.</li>
+      <li>Three FHS directories you actually opened, with one observation per directory ("<code>/etc</code> on this box has 142 files. The most interesting one was…").</li>
+    </ul>
+
+    <h3>5 · Build <code>system-report.txt</code> with pipes</h3>
+    <p>One file. Generated by at least <strong>three different compositions</strong> using pipes, redirection, or globs. Example:</p>
+<pre><code>{
+  echo "=== top 10 largest files in /var/log ==="
+  ls -lS /var/log 2&gt;/dev/null | head -n 11
+
+  echo "=== number of installed packages ==="
+  dpkg -l 2&gt;/dev/null | grep -c "^ii" || rpm -qa 2&gt;/dev/null | wc -l
+
+  echo "=== users with login shells ==="
+  cat /etc/passwd | grep -v "/nologin\|/false" | cut -d: -f1
+} &gt; system-report.txt</code></pre>
+    <p>The point isn't the exact pipelines — it's that <strong>you composed them yourself</strong> and the file proves you understand shell plumbing.</p>
+
+    <h3>6 · Add a non-root user with a shared group</h3>
+    <p>The box you got booted as <code>root</code> or as a default cloud user. <strong>Don't operate as root long-term.</strong> Create a real user for yourself plus a shared group, and use the right permissions on a shared directory:</p>
+    <ul>
+      <li>Create a new user (your name) with a home dir and a real shell.</li>
+      <li>Add them to the <code>sudo</code> group (or <code>wheel</code> on RHEL) so they can run privileged commands.</li>
+      <li>Create a <code>devs</code> group, add yourself, and make <code>/srv/shared</code> owned by <code>root:devs</code> with mode <code>2775</code> (SGID — see Lab 04).</li>
+      <li>Verify with <code>id</code>, <code>getent</code>, and <code>ls -ld /srv/shared</code>.</li>
+    </ul>
+    <p>Document the exact commands in <code>users.md</code>, including a copy of the <code>/etc/passwd</code> and <code>/etc/group</code> rows for the user/group you added.</p>
+
+    <h3>7 · Mount an extra volume</h3>
+    <p>Add storage beyond the root filesystem and make it survive a reboot:</p>
+    <ul>
+      <li>Either attach a second disk (cloud / VM-host UI) <em>or</em> create a loopback device from a regular file (see Lab 05).</li>
+      <li>Format it with <code>ext4</code> (or <code>xfs</code>), label it, mount it at <code>/data</code>.</li>
+      <li>Persist the mount in <code>/etc/fstab</code> by <strong>UUID</strong> (never device path) with <code>nofail</code>.</li>
+      <li>Reboot. Verify the mount survives — check with <code>findmnt /data</code>.</li>
+    </ul>
+    <p>Document the layout (<code>lsblk</code> output before and after) and your <code>/etc/fstab</code> line in <code>storage.md</code>.</p>
+
+    <h3>8 · Deploy a custom systemd service</h3>
+    <p>Replace the cron-jobby instinct with a real <code>.service</code> + <code>.timer</code> pair (see Lab 05):</p>
+    <ul>
+      <li>Write a small script under <code>/usr/local/bin/</code> that does something useful — appends a heartbeat to <code>/data/heartbeat.log</code>, snapshots <code>df -h</code>, or rotates your system report.</li>
+      <li>Save a <code>.service</code> file under <code>/etc/systemd/system/</code> that runs the script as your non-root user.</li>
+      <li>Save a paired <code>.timer</code> file that fires it on a schedule (every 5 min is fine for the demo).</li>
+      <li><code>systemctl daemon-reload</code>, <code>enable --now</code> the timer, then check <code>systemctl list-timers</code> and <code>journalctl -u &lt;svc&gt; -f</code>.</li>
+    </ul>
+    <p>Commit both unit files to your repo under <code>systemd/</code>.</p>
+
+    <h3>9 · Submit as a Git repo</h3>
+    <p>Initialize Git in your VM. Put the artifacts under a sensible structure:</p>
+<pre><code>my-linux-final/
+├── README.md              # 1-page intro: what's here, how to read it
+├── boot.md                # your boot narrative
+├── users.md               # how you set up the user, group, /srv/shared
+├── storage.md             # disk layout + your fstab line
+├── system-report.txt      # pipe-built system snapshot
+├── dotfiles/
+│   ├── bashrc-snippet     # the lines you added to ~/.bashrc
+│   └── ps1-example.txt    # screenshot or copy of your prompt
+├── bin/
+│   └── greet              # (or your other script)
+└── systemd/
+    ├── heartbeat.service  # your service unit
+    └── heartbeat.timer    # paired timer unit</code></pre>
+    <p>Push to GitHub and submit the repo URL.</p>
+
+    <h2>Success criteria</h2>
+    <p>You pass when a reviewer can:</p>
+    <ol>
+      <li>Read your <code>README.md</code> and understand the scope of what you did in under two minutes.</li>
+      <li>Verify your aliases are real (copy them into their own shell — they work).</li>
+      <li>Read <code>boot.md</code> and find concrete, machine-specific values (not template placeholders) for each of the boot stages, file types, and FHS observations.</li>
+      <li>Read <code>system-report.txt</code> and tell which pipe / redirect / glob produced each section.</li>
+      <li>Look at your <code>bin/</code> script, run <code>shellcheck</code> on it, and see no critical warnings.</li>
+      <li>Read <code>users.md</code> and verify you created a real non-root user with sudo + a shared <code>/srv/shared</code> directory using SGID.</li>
+      <li>Read <code>storage.md</code>, see a UUID-based <code>fstab</code> line, and confirm the extra volume mounts at <code>/data</code> after a reboot.</li>
+      <li>Copy the unit files from your <code>systemd/</code> directory onto another machine, <code>daemon-reload</code>, enable the timer, and see it run end-to-end via <code>journalctl</code>.</li>
+    </ol>
+
+    <h2>What we're <em>not</em> grading</h2>
+    <ul>
+      <li>Aesthetic of your prompt. Make it work for you.</li>
+      <li>Which distro you chose.</li>
+      <li>How many aliases beyond the required three — three real ones beat thirty copy-pasted ones.</li>
+      <li>Whether you used bash or zsh.</li>
+    </ul>
+
+    <h2>Stretch (optional, but encouraged)</h2>
+    <ul>
+      <li><strong>Two more dotfiles:</strong> add <code>~/.gitconfig</code> with your name + email, and <code>~/.tmux.conf</code> if you use tmux.</li>
+      <li><strong>Install script:</strong> write <code>setup.sh</code> in your repo that, when run on a fresh VM, sets everything up by symlinking your dotfiles and dropping scripts into <code>~/bin</code>. Idempotent.</li>
+      <li><strong>Service health one-liner:</strong> add to <code>system-report.txt</code> the count of failed systemd units (<code>systemctl --failed</code>), and explain in <code>boot.md</code> what each failure means on your box.</li>
+      <li><strong>Public the repo:</strong> make it public. The next student in the program might learn from your setup.</li>
+    </ul>
+
+    <h2>Resources</h2>
+    <ul>
+      <li><a href="../homework/lab-01-cli-tour.html">Lab 01 — CLI Tour</a></li>
+      <li><a href="../homework/lab-02-pipes-and-path.html">Lab 02 — Pipes &amp; PATH</a></li>
+      <li><a href="../homework/lab-03-boot-and-fhs.html">Lab 03 — Boot &amp; FHS</a></li>
+      <li><a href="../homework/lab-04-permissions-and-users.html">Lab 04 — Permissions &amp; Users</a></li>
+      <li><a href="../homework/lab-05-storage-and-services.html">Lab 05 — Storage &amp; Services</a></li>
+      <li><a href="../docs/cheat-sheet.html">Cheat sheet</a></li>
+      <li><a href="../syllabus.html">Syllabus</a></li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>Course 01 — Linux Fundamentals · Final Project</span>
+      <span><a href="../index.html">↩ course home</a></span>
+    </footer>
+  </article>
+</body>
+</html>

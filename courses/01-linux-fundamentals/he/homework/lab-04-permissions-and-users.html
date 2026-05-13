@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>מעבדה 04 — הרשאות ומשתמשים — יסודות לינוקס</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../he/index.html">אקדמיה</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">קורס 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">עברית</a>
+    <span class="sep">/</span>
+    <span class="here">מעבדה 04 — הרשאות ומשתמשים</span>
+    <span class="lang-switch">
+      <a href="../../en/homework/lab-04-permissions-and-users.html">EN</a>
+      <a href="lab-04-permissions-and-users.html" class="active">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">קורס 01 · יסודות לינוקס · שיעורי בית</div>
+    <h1>מעבדה 04 — הרשאות ומשתמשים</h1>
+    <p class="lede">הקימו שני משתמשים אמיתיים, צרפו אותם לקבוצה משותפת, והשתמשו בהרשאות וב-bits מיוחדים כדי לבנות workspace שעובד נכון. אמתו את כל הצעדים עם <code>ls -l</code>, <code>id</code> ו-<code>stat</code>.</p>
+
+    <table class="meta">
+      <tbody>
+        <tr><th>קורס</th><td>01 — יסודות לינוקס</td></tr>
+        <tr><th>זמן</th><td>כשעה</td></tr>
+        <tr><th>תוצר</th><td><code>~/lab-04/transcript.txt</code> + השורות של alice ו-bob ב-<code>/etc/passwd</code> + רפלקציה של פסקה</td></tr>
+        <tr><th>מצגות תואמות</th><td>34–36 (חלק 04 — תפעול המערכת)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>מטרה</h2>
+    <p>בסיום המעבדה תוכלו ליצור משתמשים, לצרף אותם לקבוצות, לבנות תיקייה משותפת שמעניקה אוטומטית את הקבוצה הנכונה לקבצים חדשים באמצעות SGID, להגדיר <code>chmod</code> לשלושה תרחישים מהעולם האמיתי, ולהוכיח שה-sticky bit על <code>/tmp</code> עובד.</p>
+
+    <h2>הקמה</h2>
+    <p>נדרשת מכונת לינוקס אמיתית עם הרשאות sudo — VM, WSL2, או מכונה בענן. <strong>אל תשתמשו ב-container של Docker</strong> — חלק מהפקודות משנות את <code>/etc/passwd</code> ו-<code>/etc/shadow</code>, וההתנהגות בתוך container שונה ממערכת מלאה.</p>
+<pre><code>mkdir -p ~/lab-04
+cd ~/lab-04
+script -q transcript.txt        # התחלת הקלטה של כל מה שתעשו
+# (הריצו :exit או Ctrl-D כשגמרתם)</code></pre>
+    <div class="callout">
+      <strong>טיפ —</strong> <code>script(1)</code> מקליט את כל הסשן ל-<code>transcript.txt</code>. הריצו את כל המשימות שלמטה בתוך ההקלטה, ואז צאו.
+    </div>
+
+    <h2>משימות</h2>
+    <p>עבדו לפי הסדר. קראו כל שורה לפני שאתם לוחצים Enter.</p>
+
+    <h3><span class="stepnum">01</span>בדיקת המצב הנוכחי</h3>
+<pre><code>whoami
+id
+cat /etc/passwd | head -5      # הפורמט: name:x:uid:gid:gecos:home:shell
+cat /etc/group | head -5
+ls -l /etc/shadow              # רק root יכול לקרוא</code></pre>
+    <p>אתם אמורים לראות את המשתמש שלכם ב-<code>/etc/passwd</code>, ורשימת קבוצות מ-<code>id</code>.</p>
+
+    <h3><span class="stepnum">02</span>יצירת שני משתמשים</h3>
+<pre><code>sudo useradd -m -s /bin/bash alice
+sudo useradd -m -s /bin/bash bob
+sudo passwd alice
+sudo passwd bob
+
+id alice
+getent passwd alice
+ls -ld /home/alice</code></pre>
+    <p>אמתו שהמשתמשים קיימים, שיש להם תיקיות בית, ושהוקצו להם UIDs (כנראה 1001 ו-1002 במכונה חדשה).</p>
+
+    <h3><span class="stepnum">03</span>יצירת קבוצה משותפת</h3>
+<pre><code>sudo groupadd devs
+sudo usermod -aG devs alice
+sudo usermod -aG devs bob
+
+getent group devs              # אמור להציג את שני החברים
+id alice                       # devs אמור להופיע בקבוצות של alice</code></pre>
+    <div class="callout warn">
+      <strong>ה-<code>-a</code> קריטי.</strong> <code>usermod -G devs alice</code> (בלי <code>-a</code>) <em>מחליף</em> את רשימת הקבוצות של alice עם <code>devs</code> בלבד — היא תאבד את כל החברויות האחרות. תמיד <code>usermod -aG</code>.
+    </div>
+
+    <h3><span class="stepnum">04</span>בניית workspace משותף עם SGID</h3>
+<pre><code>sudo mkdir /srv/shared
+sudo chown root:devs /srv/shared
+sudo chmod 2775 /srv/shared        # 2 מקדים = SGID
+ls -ld /srv/shared                 # ה-mode מציג 'rwxrwsr-x' — ה-'s' הוא SGID
+stat /srv/shared</code></pre>
+    <p>עכשיו תנו לכל משתמש להוסיף קובץ:</p>
+<pre><code>sudo -u alice touch /srv/shared/from-alice.txt
+sudo -u bob   touch /srv/shared/from-bob.txt
+ls -l /srv/shared</code></pre>
+    <p>שני הקבצים אמורים להציג את קבוצה <code>devs</code> — זה ה-SGID בפעולה. בלעדיו, כל קובץ היה מקבל את הקבוצה הראשית של היוצר.</p>
+
+    <h3><span class="stepnum">05</span>שלושה תרחישי הרשאות</h3>
+    <p>לכל תרחיש, הגדירו את ה-mode המתאים ואמתו עם <code>ls -l</code>.</p>
+    <table>
+      <thead><tr><th>תרחיש</th><th>מה אתם רוצים</th><th>Mode</th></tr></thead>
+      <tbody>
+        <tr><td>סקריפט שכולם יכולים להריץ</td><td>בעלים הכל, אחרים r+x</td><td><code>755</code></td></tr>
+        <tr><td>קובץ תצורה שרק root יכול לקרוא</td><td>בעלים r+w בלבד</td><td><code>600</code></td></tr>
+        <tr><td>קובץ לוג שקבוצת <code>devs</code> יכולה להוסיף אליו</td><td>בעלים+קבוצה r+w, אחרים r</td><td><code>664</code></td></tr>
+      </tbody>
+    </table>
+<pre><code># סקריפט שכולם יכולים להריץ
+printf '#!/bin/bash\necho "hi from $USER"\n' | sudo tee /usr/local/bin/hi
+sudo chmod 755 /usr/local/bin/hi
+sudo -u alice /usr/local/bin/hi
+
+# תצורה שרק root יכול לקרוא
+sudo touch /etc/important.conf
+sudo chmod 600 /etc/important.conf
+ls -l /etc/important.conf
+sudo -u alice cat /etc/important.conf    # אמור להיכשל ב-permission denied
+
+# לוג משותף שניתן לכתיבה ע"י devs
+sudo touch /srv/shared/devs.log
+sudo chown root:devs /srv/shared/devs.log
+sudo chmod 664 /srv/shared/devs.log
+sudo -u alice sh -c 'echo "alice was here" &gt;&gt; /srv/shared/devs.log'
+sudo -u bob   sh -c 'echo "bob was here"   &gt;&gt; /srv/shared/devs.log'
+cat /srv/shared/devs.log</code></pre>
+
+    <h3><span class="stepnum">06</span>הוכחת ה-sticky bit על <code>/tmp</code></h3>
+<pre><code>ls -ld /tmp                                # ה-mode מסתיים ב-'t' — sticky bit
+sudo -u alice touch /tmp/alice.txt
+sudo -u bob   rm /tmp/alice.txt            # אמור להיכשל — alice היא הבעלים</code></pre>
+    <p>בלי sticky bit, כל מי שיש לו הרשאת write על <code>/tmp</code> יכול היה למחוק קבצים של אחרים. איתו — רק הבעלים (או root) יכול למחוק.</p>
+
+    <h3><span class="stepnum">07</span>בדיקה עם <code>stat</code></h3>
+<pre><code>stat /srv/shared
+stat /usr/local/bin/hi
+stat /tmp</code></pre>
+    <p><code>stat</code> מציג את ה-mode גם באוקטלי וגם בסימבולי — שימושי כשלא זוכרים מה זה מה.</p>
+
+    <h3><span class="stepnum">08</span>ניקוי <em>(אופציונלי)</em></h3>
+<pre><code>sudo userdel -r alice
+sudo userdel -r bob
+sudo groupdel devs
+sudo rm -rf /srv/shared
+sudo rm -f /etc/important.conf /usr/local/bin/hi</code></pre>
+
+    <h2>טיפים</h2>
+    <ul>
+      <li>לאחר הוספת משתמש לקבוצה, הוא צריך <strong>להתנתק ולהיכנס מחדש</strong> כדי שהקבוצה תיתן תוקף לסשן שלו. <code>sudo -u alice ...</code> עוקף את זה כי הוא מייצר סשן חדש.</li>
+      <li><code>getent passwd alice</code> עובד גם כאשר מסד המשתמשים נמצא ב-LDAP או AD ולא ב-<code>/etc/passwd</code>. הרגילו את עצמכם להשתמש בו.</li>
+      <li>אם <code>chmod 2775</code> נראה מוזר: ה-<code>2</code> המקדים הוא SGID, ו-<code>775</code> הוא ה-rwx הרגיל של owner/group/other. <code>4xxx</code> זה SUID, <code>1xxx</code> זה sticky.</li>
+      <li><code>ls -ld</code> מציג את התיקייה עצמה ולא את התוכן שלה — שימושי לבדיקת mode על תיקייה.</li>
+    </ul>
+
+    <h2>תוצר</h2>
+    <ol>
+      <li><code>~/lab-04/transcript.txt</code> — הקלטת ה-<code>script</code> המלאה שלכם.</li>
+      <li>שורות <code>/etc/passwd</code> של <code>alice</code> ו-<code>bob</code> (שתי השורות האלה בלבד).</li>
+      <li>פסקת רפלקציה אחת: <em>מה ה-SGID bit על <code>/srv/shared</code> בעצם נותן? תארו מה היה משתבש בלעדיו.</em></li>
+    </ol>
+
+    <h2>אתגרים</h2>
+    <ul>
+      <li>תנו ל-alice <strong>sudo בלי סיסמה לפקודה אחת ספציפית</strong> (<code>/usr/local/bin/hi</code>) על ידי הנחת קובץ ב-<code>/etc/sudoers.d/alice</code>. בדקו עם <code>sudo -n -u alice /usr/local/bin/hi</code>.</li>
+      <li>השתמשו ב-<code>setfacl</code> כדי לתת ל-<strong>bob בלבד</strong> (לא לכל קבוצת <code>devs</code>) הרשאת write לקובץ ספציפי. אמתו עם <code>getfacl</code>.</li>
+      <li>הגדירו ACL ברירת מחדל על <code>/srv/shared</code> כך שכל קובץ חדש יהיה ניתן לכתיבה ע"י <code>devs</code> בלי קשר ל-umask: <code>setfacl -d -m g:devs:rw /srv/shared</code>.</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>מעבדה 04 — הרשאות ומשתמשים · קורס 01</span>
+      <span><a href="../index.html">↩ דף הקורס</a></span>
+    </footer>
+  </article>
+</body>
+</html>

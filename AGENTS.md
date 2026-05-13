@@ -20,6 +20,16 @@ You are authoring **slides** in this repo. Every slide is arbitrary React code t
 
 Keep this file short: hard rules only. All deeper guidance lives in the skills above.
 
+## Deck conventions (project-local)
+
+These are project-specific patterns that override or extend the framework skills. Apply them to every deck under `slides/` in this repo.
+
+- **Q&A pause pages** — every deck that uses `SectionDivider`s gets a `PausePage` between sections AND one at the very end. The convention:
+  - **Between sections** — after the last content page of a section, before the next `SectionDivider`. Shows `End of <section>` eyebrow, a huge **Questions?** hero, plus a two-column block: "we just covered" bullets on the left, "up next" (the title of the next section) on the right.
+  - **At the end of the deck** — after the final content page. Same shape, with `section` = the deck name and `next` = whatever comes after the deck (next course, "your first week", etc.).
+  - Canonical implementation: `slides/linux-fundamentals/index.tsx` — see `PausePage`, `ShellPause`, `PowerupsPause`, `ClosingPause`. Each pause page increments `TOTAL` and gets its own slot in the default export.
+  - Skip only if the deck has no section dividers (e.g. a 3-page micro deck) or the user explicitly asks for a no-pause flow.
+
 ## Updating skills
 
 The skills above are managed by `@open-slide/core`. Do not edit them in place. To pull the latest versions:

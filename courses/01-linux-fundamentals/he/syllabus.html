@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>קורס 01 — יסודות לינוקס — סילבוס</title>
+  <link rel="stylesheet" href="../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../he/index.html">אקדמיה</a>
+    <span class="sep">/</span>
+    <a href="../index.html">קורס 01</a>
+    <span class="sep">/</span>
+    <a href="index.html">עברית</a>
+    <span class="sep">/</span>
+    <span class="here">סילבוס</span>
+    <span class="lang-switch">
+      <a href="../en/syllabus.html">EN</a>
+      <a href="syllabus.html" class="active">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">קורס 01 · יסודות לינוקס</div>
+    <h1>קורס 01 — יסודות לינוקס — סילבוס</h1>
+    <p class="lede">מ"מעולם לא פתחתי טרמינל" ל"אני יכול לחיות בתוך טרמינל בנוחות". הקורס המעשי הראשון בתוכנית.</p>
+
+    <h2>במבט אחד</h2>
+    <table class="meta">
+      <tbody>
+        <tr><th>משך</th><td>כשבועיים (8–12 שעות פרונטליות + עבודת מעבדה)</td></tr>
+        <tr><th>רמה</th><td>מתחילים — מניחים שאתם יודעים להשתמש במחשב אך לא בטרמינל</td></tr>
+        <tr><th>דרישות קדם</th><td>קורס 00 — מבוא ל-DevOps (מומלץ)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>סקירה</h2>
+    <p>הסטודנטים עוברים מ"מעולם לא פתחתי טרמינל" ל"אני יכול להקים, להפעיל ולנפות שגיאות במכונת לינוקס לבד". הקורס מחולק לארבעה חלקים: <strong>ה-shell</strong> (פקודות, נתיבים, הפניות, pipes, globbing); <strong>שדרוגי shell</strong> (aliases, היסטוריה, עריכת שורה, jobs, <code>PATH</code>, prompts, יסודות scripting); <strong>מתחת למכסה המנוע</strong> (קרנל מול מרחב המשתמש, system calls, sudo, boot, systemd, ה-FHS); ו<strong>תפעול המערכת</strong> — ניהול חבילות, vi, הרשאות, משתמשים וקבוצות, תהליכים ומשאבים, ארכיונים, משימות מתוזמנות, אחסון ומערכות קבצים, LVM, לוגים, וכתיבת שירות systemd משלכם. לכל מושג יש פקודה להקליד, לכל מעבדה יש פלט להציג.</p>
+
+    <h2>תוצרי למידה</h2>
+    <p>בסיום הקורס, סטודנט יוכל:</p>
+    <ul>
+      <li>לנווט בכל מערכת קבצים של לינוקס באמצעות <code>pwd</code>, <code>cd</code>, <code>ls</code>, <code>pushd</code>/<code>popd</code>, <code>find</code>, ונתיבים מוחלטים מול יחסיים.</li>
+      <li>ליצור, להעתיק, להעביר, למחוק וליצור symlinks לקבצים ותיקיות — כולל פעולות רקורסיביות עם הדגלים הנכונים.</li>
+      <li>לקרוא קבצים (<code>cat</code>, <code>less</code>, <code>head</code>/<code>tail -f</code>) ולעבד streams עם pipes, הפניות (<code>&gt;</code>, <code>2&gt;</code>, <code>&amp;&gt;</code>) וערכת הכלים לטקסט (<code>grep</code>, <code>cut</code>, <code>sort</code>, <code>wc</code>, <code>tr</code>, <code>tee</code>).</li>
+      <li>להשתמש במערכת העזרה (<code>man</code>, <code>--help</code>, <code>info</code>, <code>whatis</code>, <code>apropos</code>, <code>man hier</code>) בלי להגיע למנוע חיפוש קודם.</li>
+      <li>להתאים אישית סביבת shell: aliases, היסטוריה, <code>PATH</code>, prompt (<code>PS1</code>), ולבחור shell במודע.</li>
+      <li>להסביר את הגבול בין הקרנל למרחב המשתמש, להדגים אותו עם <code>strace</code>, ולהשתמש ב-<code>sudo</code> באחריות.</li>
+      <li>לעקוב אחר תהליך ה-boot מקצה לקצה (BIOS/UEFI → bootloader → קרנל + initrd → init/systemd → login shell), לקרוא systemd targets, ולבדוק שירותים פעילים עם <code>systemctl</code> ו-<code>journalctl</code>.</li>
+      <li>לזהות את כל שבעת סוגי הקבצים בלינוקס לפי הסמל, ולנווט ב-FHS לפי תפקיד (<code>/bin</code>, <code>/etc</code>, <code>/var</code>, <code>/usr</code>, <code>/proc</code>, <code>/sys</code>, וכו׳).</li>
+      <li>להתקין, לעדכן ולהסיר תוכנה גם ב-Debian/Ubuntu (<code>apt</code> + <code>dpkg</code>) וגם ב-RHEL/Fedora (<code>dnf</code> + <code>rpm</code>); להוסיף repo חיצוני עם אימות GPG.</li>
+      <li>לערוך קבצים ב-<code>vi</code> ברמת הישרדות — modes, שמירה/יציאה, חיפוש, עריכה בסיסית.</li>
+      <li>לנהל הרשאות ובעלות על קבצים (<code>chmod</code> סימבולי + אוקטלי, <code>chown</code>, SUID/SGID/sticky, <code>umask</code>) ולנהל משתמשים וקבוצות (<code>useradd</code>, <code>usermod</code>, <code>passwd</code>, <code>groupadd</code>, <code>/etc/passwd</code>).</li>
+      <li>לבדוק תהליכים ומשאבי מערכת עם <code>top</code>, <code>ps</code>, <code>free</code>, <code>df</code>, <code>du</code>; ולשלוח signals עם <code>kill</code>.</li>
+      <li>לארוז ארכיונים (<code>tar</code>, <code>gzip</code>, <code>zstd</code>) ולתזמן משימות תקופתיות עם <code>cron</code> או timers של systemd.</li>
+      <li>למאונט מערכות קבצים, לערוך את <code>/etc/fstab</code>, ולהבין LVM (PV → VG → LV) ברמת מושג.</li>
+      <li>לקרוא לוגים מ-<code>/var/log</code> ועם <code>journalctl</code> — לסנן לפי זמן, חומרה ושירות; להכיר את <code>logrotate</code>.</li>
+      <li>לכתוב unit מותאם של systemd (<code>.service</code>) — בשילוב <code>.timer</code> להרצה תקופתית — ולהפעיל אותו אוטומטית ב-boot.</li>
+    </ul>
+
+    <h2>לוח זמנים</h2>
+    <table>
+      <thead>
+        <tr><th style="width: 12%;">מפגש</th><th style="width: 56%;">נושא</th><th>הפניה</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>למה לינוקס. היסטוריה קצרה. פקודות ראשונות. פעולות על קבצים.</td><td>מצגת עמ׳ 1–6</td></tr>
+        <tr><td>2</td><td><code>find</code>. צפייה בקבצים. קריאת <code>ls -l</code>. מערכת עזרה.</td><td>מצגת עמ׳ 7–11 · <a href="homework/lab-01-cli-tour.html">מעבדה 01</a></td></tr>
+        <tr><td>3</td><td>היסטוריה ו-aliases, עריכת שורה, jobs, pipes ו-globbing, כלי טקסט.</td><td>מצגת עמ׳ 12–17</td></tr>
+        <tr><td>4</td><td><code>PATH</code>. התאמת prompt. מבוא ל-scripting.</td><td>מצגת עמ׳ 18–21 · <a href="homework/lab-02-pipes-and-path.html">מעבדה 02</a></td></tr>
+        <tr><td>5</td><td>קרנל מול מרחב המשתמש. <code>sudo</code>. Boot. systemd targets. FHS.</td><td>מצגת עמ׳ 22–28 · <a href="homework/lab-03-boot-and-fhs.html">מעבדה 03</a></td></tr>
+        <tr><td>6</td><td>ניהול חבילות (apt + dpkg, dnf + rpm, repos). <code>vi</code>. הרשאות, bits מיוחדים, משתמשים וקבוצות.</td><td>מצגת עמ׳ 29–36 · <a href="homework/lab-04-permissions-and-users.html"><code>lab-04-permissions-and-users</code></a></td></tr>
+        <tr><td>7</td><td>תהליכים ומשאבים. ארכיונים. <code>cron</code> ו-timers. אחסון, mounts, LVM. לוגים. כתיבת שירות systemd. טעימה מרשתות.</td><td>מצגת עמ׳ 37–44 · <a href="homework/lab-05-storage-and-services.html"><code>lab-05-storage-and-services</code></a></td></tr>
+        <tr><td>8</td><td>סקירת פרויקט גמר + שאלות ותשובות.</td><td><a href="final/project.html">final/project.html</a></td></tr>
+      </tbody>
+    </table>
+
+    <h2>תוצרים</h2>
+    <ul>
+      <li><strong>שיעורי בית</strong> — חמש מעבדות:
+        <ul>
+          <li><a href="homework/lab-01-cli-tour.html"><code>lab-01-cli-tour</code></a> — סיור מודרך ב-shell (ניווט, יצירה, צפייה, מחיקה).</li>
+          <li><a href="homework/lab-02-pipes-and-path.html"><code>lab-02-pipes-and-path</code></a> — הרכבת פקודות עם pipes ו-globs; שינוי <code>PATH</code>.</li>
+          <li><a href="homework/lab-03-boot-and-fhs.html"><code>lab-03-boot-and-fhs</code></a> — בדיקת לוח הזמנים של ה-boot, רשימת שירותי systemd, סיור ב-FHS.</li>
+          <li><a href="homework/lab-04-permissions-and-users.html"><code>lab-04-permissions-and-users</code></a> — יצירת משתמשים, הגדרת בעלות קבוצתית, התנסות עם SUID/SGID, תרחישי <code>chmod</code>.</li>
+          <li><a href="homework/lab-05-storage-and-services.html"><code>lab-05-storage-and-services</code></a> — mount של loopback device, עריכת <code>/etc/fstab</code>, כתיבת <code>.service</code> + <code>.timer</code> וצפייה בפעולתם.</li>
+        </ul>
+      </li>
+      <li><strong>פרויקט גמר</strong> — <a href="final/project.html">להפוך מכונת לינוקס לשלכם</a> — להקים מכונת לינוקס חדשה, להתאים אותה מקצה לקצה, להוסיף משתמש ושירות systemd מותאם, למאונט volume, לבנות דוח מערכת עם pipes, ולהגיש את הכל כריפו Git (כ-3–5 שעות).</li>
+    </ul>
+
+    <h2>משאבים</h2>
+    <ul>
+      <li><strong>מצגת</strong> — <code>slides/linux-fundamentals/</code> — הריצו <code>pnpm dev</code> וגשו ל-<code>/s/linux-fundamentals</code>.</li>
+      <li><strong>דף עזר</strong> — <a href="docs/cheat-sheet.html"><code>docs/cheat-sheet.html</code></a> — דף הפניה אחד בעברית/אנגלית. פתחו בדפדפן, הדפיסו ל-PDF במידת הצורך.</li>
+      <li><strong>קריאה חיצונית:</strong>
+        <ul>
+          <li><a href="https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html">Linux Filesystem Hierarchy Standard (FHS)</a> — ההפניה הקנונית.</li>
+          <li><a href="https://tldp.org/">The Linux Documentation Project</a> — מדריכים ארוכים.</li>
+          <li><code>man hier</code> — מתאר את מבנה מערכת הקבצים ישירות מהטרמינל שלכם.</li>
+          <li><a href="https://linuxcommand.org/"><em>The Linux Command Line</em></a> (William Shotts, PDF חינמי) — ספר ליווי מצוין.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h2>הערכה</h2>
+    <p>סטודנט עובר את הקורס כאשר השלים:</p>
+    <ol>
+      <li>את כל חמש המעבדות (תוצרים מוגשים כתעתיק פקודות + רפלקציה קצרה).</li>
+      <li>את פרויקט הגמר: סביבת לינוקס עובדת עם ההתאמות המתוארות, בתוספת סיכום קצר של רצף ה-boot ושל שירות ה-systemd שהוסיף.</li>
+      <li>הוכיח, בשיחה, שהוא יכול לענות: <em>"מה קורה כשאני לוחץ Enter על <code>ls -l /etc</code>?"</em> — נוגע ב-shell, ב-PATH, ב-syscalls ובקרנל.</li>
+    </ol>
+
+    <footer class="doc-footer">
+      <span>קורס 01 — יסודות לינוקס · DevOps Academy</span>
+      <span><a href="index.html">↩ דף הקורס</a></span>
+    </footer>
+  </article>
+</body>
+</html>

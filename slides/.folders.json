@@ -1,4 +1,16 @@
 {
-  "folders": [],
-  "assignments": {}
+  "folders": [
+    {
+      "id": "f-ef5a45a4",
+      "name": "Linux fundementals",
+      "icon": {
+        "type": "color",
+        "value": "#c0392b"
+      }
+    }
+  ],
+  "assignments": {
+    "linux-fundamentals": "f-ef5a45a4",
+    "shell-scripting": "f-ef5a45a4"
+  }
 }

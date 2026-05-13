@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DevOps Academy</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <span class="here">DevOps Academy</span>
+    <span class="lang-switch">
+      <a href="index.html" class="active">EN</a>
+      <a href="he/index.html">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">DevOps Academy</div>
+    <h1>DevOps Academy</h1>
+    <p class="lede">A series of self-contained courses that take a learner from "what is Linux" to running and operating real systems. Each course has its own slide deck, syllabus, homework labs, supplementary docs, and (sometimes) a final project.</p>
+
+    <h2>Courses</h2>
+
+    <div class="card-grid">
+      <a class="card" href="courses/00-devops-intro/en/index.html">
+        <span class="num">00</span>
+        <span>
+          <p class="title">DevOps Intro</p>
+          <p class="summary">What DevOps is, why it exists, the CALMS pillars, a CI/CD pipeline, the tooling landscape — orientation for everything that follows.</p>
+        </span>
+        <span class="status ready">course ready</span>
+      </a>
+
+      <a class="card" href="courses/01-linux-fundamentals/en/index.html">
+        <span class="num">01</span>
+        <span>
+          <p class="title">Linux Fundamentals</p>
+          <p class="summary">Live in a shell with confidence — navigation, file ops, help, history, pipes, PATH, sudo, boot, systemd, and the FHS.</p>
+        </span>
+        <span class="status draft">deck + lab 01 ready</span>
+      </a>
+
+      <span class="card dim">
+        <span class="num">02</span>
+        <span>
+          <p class="title">Shell Scripting</p>
+          <p class="summary">Turn one-liners into reliable automation — bash syntax, control flow, robust scripts.</p>
+        </span>
+        <span class="status">stub deck</span>
+      </span>
+
+      <span class="card dim">
+        <span class="num">03</span>
+        <span>
+          <p class="title">Git &amp; Version Control</p>
+          <p class="summary">Track every change, collaborate without conflict, undo with confidence.</p>
+        </span>
+        <span class="status">stub deck</span>
+      </span>
+
+      <span class="card dim">
+        <span class="num">04</span>
+        <span>
+          <p class="title">Networking &amp; SSH</p>
+          <p class="summary">How packets reach your service, and how you reach your servers.</p>
+        </span>
+        <span class="status">stub deck</span>
+      </span>
+
+      <span class="card dim">
+        <span class="num">05</span>
+        <span>
+          <p class="title">Docker &amp; Containers</p>
+          <p class="summary">Package once, run anywhere — the building block of modern infrastructure.</p>
+        </span>
+        <span class="status">stub deck</span>
+      </span>
+
+      <span class="card dim">
+        <span class="num">06</span>
+        <span>
+          <p class="title">Kubernetes</p>
+          <p class="summary">Run containers at scale, declaratively.</p>
+        </span>
+        <span class="status">stub deck</span>
+      </span>
+
+      <span class="card dim">
+        <span class="num">07</span>
+        <span>
+          <p class="title">CI/CD with Jenkins</p>
+          <p class="summary">Automate every step from commit to production.</p>
+        </span>
+        <span class="status">stub deck</span>
+      </span>
+
+      <span class="card dim">
+        <span class="num">08</span>
+        <span>
+          <p class="title">Infrastructure as Code</p>
+          <p class="summary">Version-control your servers, networks, and clusters.</p>
+        </span>
+        <span class="status">stub deck</span>
+      </span>
+
+      <span class="card dim">
+        <span class="num">09</span>
+        <span>
+          <p class="title">Observability</p>
+          <p class="summary">See what your system is actually doing — before users complain.</p>
+        </span>
+        <span class="status">stub deck</span>
+      </span>
+
+      <span class="card dim">
+        <span class="num">10</span>
+        <span>
+          <p class="title">Capstone Project</p>
+          <p class="summary">Pull it all together — ship a real DevOps project end-to-end.</p>
+        </span>
+        <span class="status">stub deck</span>
+      </span>
+    </div>
+
+    <h2>How this site works</h2>
+    <ul>
+      <li>Each course is a folder under <code>courses/</code>. Click in to see its syllabus, homework labs, docs, and final project.</li>
+      <li>Every course is bilingual — English and Hebrew. The switcher in the top-right toggles language.</li>
+      <li>Slide decks live separately under <code>slides/</code> and are served by the open-slide dev server — run <code>pnpm dev</code>, then navigate to <code>/s/&lt;slide-id&gt;</code>.</li>
+      <li>Inside any course folder, the <code>slides/</code> entry is a symlink to its deck — same files, two access points.</li>
+      <li>Everything you see here is plain HTML + a shared <code>assets/styles.css</code>. No build step.</li>
+    </ul>
+
+    <h2>For maintainers</h2>
+    <ul>
+      <li><strong>Program index for git/IDE</strong> — <a href="PROGRAM.md">PROGRAM.md</a>.</li>
+      <li><strong>Authoring skill</strong> — <code>.claude/skills/course-authoring/</code>. Use phrases like "scaffold course 02", "write a homework lab for linux-fundamentals on FHS", "build the final for course 01".</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>DevOps Academy</span>
+      <span><a href="PROGRAM.md">↩ program index (markdown)</a></span>
+    </footer>
+  </article>
+</body>
+</html>

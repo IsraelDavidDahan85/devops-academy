@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Linux Fundamentals — Guide</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../index.html">Academy</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">Course 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">EN</a>
+    <span class="sep">/</span>
+    <span class="here">Guide</span>
+    <span class="lang-switch">
+      <a href="guide.html" class="active">EN</a>
+      <a href="../../he/docs/guide.html">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">Course 01 · DevOps Academy</div>
+    <h1>Linux Fundamentals — Guide</h1>
+    <p class="lede">A long-form companion to the slide deck. Where the slides give you the picture and the cheat sheet gives you the lookup, this document walks you through every concept in prose — the why and the when, not just the what. Read it linearly the first time; come back to specific sections after a lab.</p>
+
+    <div class="callout">
+      <strong>How this is organised —</strong> sections mirror the slide deck one-to-one. Each part of the deck is a part of this guide; each <em>section</em> within a part maps to a slide page (or a small cluster of related pages). Slide page numbers are noted in parentheses.
+    </div>
+
+    <h2>Why Linux <span class="annotation">(slide 2)</span></h2>
+    <p>Linux runs the modern world's plumbing. Every major cloud provider's compute fleet, the vast majority of internet servers, every CI runner, every Android phone, every Raspberry Pi — all Linux. As a DevOps engineer you will spend more hours staring at Linux terminals than at any other interface in your career.</p>
+    <p>The good news: once you can navigate one Linux machine, you can navigate them all. The conventions are remarkably stable. The same <code>cd</code>, <code>ls</code>, and <code>cat</code> work on a tiny embedded box and on a $50k cloud GPU instance. The shell you learn this week is the shell you'll use a decade from now. The first hour of pain pays off for the next ten years.</p>
+    <p>You don't need to memorise everything. You need to recognise the categories — "this is a process control thing", "this is a filesystem thing", "this is a network thing" — and know which command family to reach for. The rest is <code>man</code>.</p>
+
+    <h2>A short history <span class="annotation">(slide 3)</span></h2>
+    <p>Linux didn't appear from nowhere. In 1969 Ken Thompson and Dennis Ritchie built <strong>Unix</strong> at Bell Labs — a small, composable operating system organised around a single idea: <em>small tools that do one thing well, piped together</em>. That philosophy is why <code>grep | sort | uniq | head</code> still works fifty years later. Pipes outlived disco.</p>
+    <p>In 1991 Linus Torvalds posted his hobby kernel to <code>comp.os.minix</code> ("I'm doing a (free) operating system — just a hobby, won't be big and professional like GNU"). He was wrong about scale; it ate the world. The combination of Linus's kernel and the GNU project's userspace tools became <strong>GNU/Linux</strong> — commonly just "Linux" — and turned the bazaar model of open-source development from curiosity into industry default.</p>
+    <p>Git arrived in 2005 — also from Linus, built to manage Linux's own source tree. Docker in 2013 wrapped Linux namespaces and cgroups into developer-friendly containers. Every time you type <code>kubectl apply</code>, you're standing on this lineage.</p>
+
+    <h2 id="part-01">Part 01 — The Shell <span class="annotation">(slide 4)</span></h2>
+    <p>The shell is how you talk to Linux. It's a program that reads what you type, runs it, and shows you the output — a loop you'll be inside for thousands of hours. Modern shells (bash, zsh) are also small programming languages, but for the next few sections we treat the shell as a tool: types, lists, navigates, asks for help. The advanced features come in Part 02.</p>
+
+    <h3 id="first-commands">Your first commands <span class="annotation">(slide 5)</span></h3>
+    <p>Every shell session starts with a question — "where am I?" — that <code>pwd</code> ("print working directory") answers. Once you know where you are, <code>ls</code> shows you what's here, and <code>cd &lt;path&gt;</code> moves you. Three commands buy you the entire filesystem.</p>
+<pre><code>$ pwd
+/home/student
+
+$ ls
+Documents  Downloads  notes.md  projects
+
+$ cd projects &amp;&amp; pwd
+/home/student/projects</code></pre>
+    <p>A few shortcuts are worth burning in immediately: <code>cd ~</code> takes you home, <code>cd /</code> goes to the root of the whole filesystem, and <code>cd -</code> jumps back to the last directory you were in (great for ping-ponging between two places).</p>
+    <p><strong>Paths matter.</strong> A path starting with <code>/</code> is <em>absolute</em> — it always means the same thing no matter where you're standing. Anything else is <em>relative</em> to where you are right now. <code>./foo</code> means "foo in the current directory", <code>../foo</code> means "foo one level up", and bare <code>foo</code> usually means the same as <code>./foo</code>.</p>
+
+    <h3 id="file-ops">Make, move, remove <span class="annotation">(slide 6)</span></h3>
+    <p>The file-operation primitives are five verbs you'll use every day: <code>mkdir</code>, <code>touch</code>, <code>cp</code>, <code>mv</code>, <code>rm</code>. The flags matter as much as the verbs.</p>
+<pre><code>mkdir -p devops/linux/lab-01   # create the path, parents and all
+touch notes.md                  # empty file, or update its mtime
+cp -r src/ backup/              # copy a directory (-r recursive)
+cp -p config.toml /etc/         # copy + preserve mode and timestamps
+ln -s /opt/myapp/current latest # create a symlink named "latest"
+mv old.md new.md                # rename
+mv *.log archive/               # move many files at once
+rm -r old/                      # remove recursively
+rm -rf old/                     # …force, no prompts. dangerous.</code></pre>
+    <p><code>cp -r</code>'s recursive flag is the one to internalise first — without it, copying a directory fails. <code>cp -p</code> is for when you actually care about preserving timestamps and permissions (deployment scripts care). <code>ln -s</code> creates a <em>symlink</em>: a pointer to another path. Symlinks are everywhere on a real Linux system — half of <code>/usr/bin</code> is symlinks to alternates.</p>
+    <div class="callout warn">
+      <strong>The cardinal sin.</strong> <code>rm -rf</code> doesn't ask twice. Before you press Enter on any <code>rm</code> command that uses a variable (<code>$DIR</code>) or a glob (<code>*</code>), run <code>ls</code> on the same path first. The number of careers nearly ended by an unexpanded variable in <code>rm -rf "$BASE/$SUB"</code> when <code>$BASE</code> turned out to be empty is uncountable.
+    </div>
+
+    <h3 id="find">Hunt with <code>find</code> <span class="annotation">(slide 7)</span></h3>
+    <p>Where <code>ls</code> only lists what's in the current directory, <code>find</code> walks the entire tree and filters as it goes. It is the right tool whenever you need to ask the filesystem a question more interesting than "what's here?"</p>
+<pre><code>find . -name "*.log"            # every .log file under the current dir
+find /home -type f -size +100M  # regular files bigger than 100 MB
+find /etc -name "*.conf" -mtime -7   # config files modified in the last week
+find . -name "*.tmp" -delete    # …or -exec rm {} \; for more general actions</code></pre>
+    <p>The argument order matters: first the <em>where</em> (a path), then a chain of <em>filters</em> (<code>-type</code>, <code>-name</code>, <code>-size</code>, <code>-mtime</code>), then optionally an <em>action</em> (<code>-delete</code>, <code>-exec</code>). Quote any pattern with shell metacharacters — without quotes, the shell expands <code>*.log</code> before <code>find</code> ever sees it, which is almost never what you want.</p>
+    <p><code>find</code> is recursive by default. To limit depth, add <code>-maxdepth 1</code>. Combined with <code>-exec</code>, it becomes the universal "do X on every match" hammer.</p>
+
+    <h3 id="viewing">Four ways to read a file <span class="annotation">(slide 8)</span></h3>
+    <p>Reading a file sounds simple — but the right tool depends on the file's size and what you want to do with it.</p>
+<pre><code>cat short.txt              # dump the whole thing to stdout
+less /var/log/syslog       # page through; / search, n/N next, q quit
+head -n 20 big.log         # the first 20 lines
+tail -n 50 big.log         # the last 50 lines
+tail -f /var/log/nginx/access.log   # follow new appends LIVE</code></pre>
+    <p><code>cat</code> is for small files — dumping a 10 GB log to your terminal will hurt. <code>less</code> is the safe default for unknown sizes: it loads pages on demand and supports searching. <code>head</code> and <code>tail</code> are for one end of the file; <code>tail -f</code> is the one you'll memorise without trying — it follows a file as new lines are appended, the canonical "watch a log" command. Combined with a service restart in another window, <code>tail -f</code> is half of debugging.</p>
+
+    <h3 id="ls-anatomy">Reading <code>ls -l</code> <span class="annotation">(slide 9)</span></h3>
+    <p>The long-format <code>ls -l</code> output looks dense but encodes seven distinct pieces of information per file. Once you can read it, you can read any Unix system on Earth.</p>
+<pre><code>-rw-r--r--  1  student  staff  4096  Jan 12 10:14  README.md
+└──┬───┘    │  └──┬──┘  └─┬─┘  └─┬─┘  └─────┬─────┘  └────┬────┘
+  perms   links  owner  group  size       modified      name</code></pre>
+    <p>The leftmost 10 characters break down as <em>1 type + 3 owner + 3 group + 3 other</em>. The type character tells you whether it's a regular file (<code>-</code>), directory (<code>d</code>), symlink (<code>l</code>), or something more exotic (we'll meet the others in Part 03). The three permission triplets each show <code>r</code>ead, <code>w</code>rite, and e<code>x</code>ecute — or a <code>-</code> if absent.</p>
+    <p>Flags stack: <code>ls -lah</code> = long, hidden, human-readable sizes. <code>ls -ltSr</code> = long, sorted by time, then by size, reversed. The full flag glossary is in the cheat sheet; the habit of <em>stacking</em> them is the thing to internalise.</p>
+
+    <h3 id="help-system">The help system <span class="annotation">(slide 10)</span></h3>
+    <p>The shell ships with answers. Before you reach for a search engine, reach for these:</p>
+<pre><code>man cp              # the full manual page — flags, examples, see-also
+man 5 passwd        # section 5 = file formats; section 1 = commands; 8 = admin
+man hier            # the canonical tour of the filesystem hierarchy
+cp --help           # quick reference card baked into most commands
+whatis ls           # one-line description
+apropos compress    # search the manual database for a topic
+which python3       # which executable runs when you type the name
+type ll             # is it a binary, alias, function, or builtin?</code></pre>
+    <p>Man pages have <em>sections</em>: section 1 is user commands, section 5 is file formats, section 8 is system administration. When two things have the same name — a command and a config file — you disambiguate with the number: <code>man passwd</code> opens the command, <code>man 5 passwd</code> opens the file-format page describing <code>/etc/passwd</code>.</p>
+    <p>Memorising <code>man hier</code> is a high-leverage move. Run it once. It's a single page that names every top-level directory in the FHS and tells you what's supposed to live there — the canonical reference, on every Linux machine, no internet required.</p>
+
+    <h2 id="part-02">Part 02 — Power-ups <span class="annotation">(slide 12)</span></h2>
+    <p>The shell is more than running commands. History, aliases, jobs, pipes, paths, and prompts turn it into a tool you steer with your fingertips. This part covers the day-to-day muscle memory that separates "I can use a shell" from "I live in a shell."</p>
+    <div class="callout"><strong>Coming soon —</strong> this part is scaffolded but not yet written. See the slides (pages 12–21) for full coverage until the prose lands.</div>
+
+    <h3>Repeat yourself less — history &amp; aliases <span class="annotation">(slide 13)</span></h3>
+    <p><em>To be written:</em> <code>history</code>, <code>!!</code>, <code>!137</code>, <code>!ls</code>, <code>sudo !!</code>, <code>Ctrl+R</code> incremental search, defining aliases and persisting them in <code>~/.bashrc</code> / <code>~/.zshrc</code>.</p>
+
+    <h3>Line-editing shortcuts <span class="annotation">(slide 14)</span></h3>
+    <p><em>To be written:</em> readline keystrokes — <kbd>Ctrl+A</kbd>/<kbd>E</kbd> for line ends, <kbd>Ctrl+U</kbd>/<kbd>K</kbd> for cut-to-ends, <kbd>Ctrl+W</kbd> word-delete, <kbd>Ctrl+R</kbd> reverse-search, <kbd>Tab</kbd> completion.</p>
+
+    <h3>Long-running jobs <span class="annotation">(slide 15)</span></h3>
+    <p><em>To be written:</em> backgrounding with <code>&amp;</code>, <code>jobs</code> / <code>fg</code> / <code>bg</code>, <kbd>Ctrl+Z</kbd> suspend, signals (<code>kill -TERM</code>, <code>kill -9</code>, <code>kill -HUP</code>), <code>nohup</code>, when to reach for <code>tmux</code> / <code>screen</code> instead.</p>
+
+    <h3>Plumbing &amp; wildcards <span class="annotation">(slide 16)</span></h3>
+    <p><em>To be written:</em> redirection (<code>&gt;</code>, <code>&gt;&gt;</code>, <code>2&gt;</code>, <code>&amp;&gt;</code>, <code>&lt;</code>), pipes (<code>|</code>), globbing patterns (<code>*</code>, <code>?</code>, <code>[abc]</code>, <code>[!a]</code>, <code>{a,b,c}</code>, <code>**</code>), the Unix-philosophy "small tools, glued by pipes" model.</p>
+
+    <h3>Slice the stream — text tools <span class="annotation">(slide 17)</span></h3>
+    <p><em>To be written:</em> <code>grep</code> (<code>-i</code>, <code>-v</code>, <code>-r</code>), <code>cut -d:</code>, <code>sort -u</code>, <code>wc -l</code>, <code>tr</code>, <code>tee</code>, and how they compose into stream-processing pipelines.</p>
+
+    <h3><code>$PATH</code> <span class="annotation">(slide 18)</span></h3>
+    <p><em>To be written:</em> what <code>$PATH</code> is, why order matters (first match wins), <code>which</code> vs <code>type</code>, persisting <code>export</code>s in rc files, the difference between login and interactive shells, the canonical never-delete-<code>/usr/bin</code> warning.</p>
+
+    <h3>Make it yours — customising the prompt <span class="annotation">(slide 19)</span></h3>
+    <p><em>To be written:</em> <code>PS1</code> escape codes (<code>\u</code>, <code>\h</code>, <code>\w</code>, <code>\W</code>, <code>\t</code>, <code>\$</code>), adding colour, persisting in <code>~/.bashrc</code>.</p>
+
+    <h3>From one-liners to scripts <span class="annotation">(slide 20)</span></h3>
+    <p><em>To be written:</em> the shebang line, <code>chmod +x</code>, parameter expansion with defaults (<code>${1:-friend}</code>), heredocs (<code>&lt;&lt;'EOF'</code>), <code>export</code> for environment variables — bridging into Course 02 (Shell Scripting).</p>
+
+    <h2 id="part-03">Part 03 — Under the hood <span class="annotation">(slide 22)</span></h2>
+    <p>Beneath every command is a kernel, a process, and a thousand system calls. Knowing what's down there turns "magic" into engineering — and gives you the vocabulary you'll need when something breaks at 3am.</p>
+    <div class="callout"><strong>Coming soon —</strong> see slides 22–27 for the full coverage.</div>
+
+    <h3>Kernel &amp; user space <span class="annotation">(slide 23)</span></h3>
+    <p><em>To be written:</em> the hotel-manager analogy, the user/kernel boundary, system calls, <code>strace</code> as a window into syscall traffic, the <code>/proc</code> filesystem.</p>
+
+    <h3><code>sudo</code> <span class="annotation">(slide 24)</span></h3>
+    <p><em>To be written:</em> what <code>sudo</code> actually does (set-uid root binary), <code>sudo -i</code> vs <code>sudo</code>, <code>sudo -l</code>, <code>visudo</code>, the principle of least privilege.</p>
+
+    <h3>The boot process <span class="annotation">(slide 25)</span></h3>
+    <p><em>To be written:</em> BIOS/UEFI → bootloader (GRUB / systemd-boot) → kernel + initrd → init/systemd → login shell. Where to look at each stage (<code>dmesg</code>, <code>journalctl -b</code>, <code>systemd-analyze</code>).</p>
+
+    <h3>systemd targets <span class="annotation">(slide 26)</span></h3>
+    <p><em>To be written:</em> runlevels mapped to targets, <code>systemctl get-default</code>, <code>systemctl list-units --type=target</code>, journalctl filters (<code>-u</code>, <code>-f</code>, <code>-p err</code>, <code>--list-boots</code>), <code>systemd-analyze blame</code>.</p>
+
+    <h3>Seven file types &amp; the FHS <span class="annotation">(slide 27)</span></h3>
+    <p><em>To be written:</em> the seven type characters (<code>-</code>, <code>d</code>, <code>l</code>, <code>c</code>, <code>b</code>, <code>p</code>, <code>s</code>), the everything-is-a-file principle, FHS top-level directories and their purposes, why <code>man hier</code> is the canonical reference.</p>
+
+    <h2 id="part-04">Part 04 — Operating the system <span class="annotation">(slide 29)</span></h2>
+    <p>The shell is great. But on a real machine you also install software, edit configs, manage users, mount disks, write services. This part covers the daily-driver ops work — what separates "I can use a shell" from "I can run a system."</p>
+    <div class="callout"><strong>Coming soon —</strong> see slides 29–44 for the full coverage.</div>
+
+    <h3><code>apt</code> + <code>dpkg</code> — Debian / Ubuntu package management <span class="annotation">(slide 30)</span></h3>
+    <p><em>To be written:</em> the high-level/low-level split, <code>apt update</code> / <code>install</code> / <code>upgrade</code> / <code>remove</code> / <code>purge</code> / <code>search</code> / <code>show</code>, when to drop to <code>dpkg -i</code> / <code>-l</code> / <code>-L</code> / <code>-S</code>, recovering from a broken state with <code>dpkg --configure -a</code> and <code>apt -f install</code>.</p>
+
+    <h3><code>dnf</code> + <code>rpm</code> — RHEL / Fedora package management <span class="annotation">(slide 31)</span></h3>
+    <p><em>To be written:</em> the parallel verbs on the Red Hat family, <code>dnf check-update</code> / <code>install</code> / <code>upgrade</code> / <code>autoremove</code>, low-level <code>rpm -ivh</code> / <code>-qa</code> / <code>-ql</code> / <code>-qf</code>, the differences from apt.</p>
+
+    <h3>Managing repositories <span class="annotation">(slide 32)</span></h3>
+    <p><em>To be written:</em> <code>/etc/apt/sources.list[.d]</code>, <code>add-apt-repository</code>, <code>/etc/apt/keyrings/</code>, <code>/etc/yum.repos.d/</code>, <code>dnf config-manager</code>, GPG fingerprint verification — supply-chain hygiene.</p>
+
+    <h3><code>vi</code> survival <span class="annotation">(slide 33)</span></h3>
+    <p><em>To be written:</em> modes (Normal / Insert / Visual / Ex), movement (<code>h j k l</code>, <code>w</code>/<code>b</code>, <code>0</code>/<code>$</code>, <code>gg</code>/<code>G</code>), the keystrokes that save the day (<code>:w</code>, <code>:q!</code>, <code>x</code>, <code>dd</code>, <code>yy</code>, <code>p</code>, <code>:%s/old/new/g</code>, undo/redo), counts.</p>
+
+    <h3>Permissions &amp; ownership <span class="annotation">(slide 34)</span></h3>
+    <p><em>To be written:</em> the rwx triplets (owner/group/other), octal math, <code>chmod</code> symbolic vs numeric, <code>chown</code>, <code>chgrp</code>, when to reach for <code>stat</code>.</p>
+
+    <h3>Special bits — SUID, SGID, sticky <span class="annotation">(slide 35)</span></h3>
+    <p><em>To be written:</em> the three extra bits and what they actually do; <code>umask</code> as the default-mode filter; a pointer to <code>setfacl</code> / <code>getfacl</code> for per-user ACLs.</p>
+
+    <h3>Users &amp; groups <span class="annotation">(slide 36)</span></h3>
+    <p><em>To be written:</em> <code>/etc/passwd</code>, <code>/etc/shadow</code>, <code>/etc/group</code>, <code>useradd</code>/<code>usermod</code>/<code>passwd</code>/<code>groupadd</code>, <code>id</code>, <code>su</code>, the importance of <code>-aG</code>, <code>getent</code> for LDAP/AD-aware lookups.</p>
+
+    <h3>Processes &amp; resources <span class="annotation">(slide 37)</span></h3>
+    <p><em>To be written:</em> <code>top</code>/<code>htop</code> live view, <code>ps aux</code> / <code>ps -ef</code> / <code>ps --forest</code>, <code>free</code>/<code>df</code>/<code>du</code>, signals via <code>kill</code>, peeking under the hood with <code>/proc/&lt;pid&gt;/</code>.</p>
+
+    <h3>Archives &amp; compression <span class="annotation">(slide 38)</span></h3>
+    <p><em>To be written:</em> the <code>tar</code> flag mnemonic, when to pick gzip vs zstd, streaming a tarball over <code>ssh</code>, interop with <code>zip</code>.</p>
+
+    <h3>Cron &amp; systemd timers <span class="annotation">(slide 39)</span></h3>
+    <p><em>To be written:</em> the 5-field crontab format, <code>/etc/cron.d/*</code>, when to reach for a systemd <code>.timer</code> instead (logging, dependencies, on-boot triggers), <code>OnCalendar</code> vs <code>OnUnitActiveSec</code>.</p>
+
+    <h3>Storage &amp; filesystems <span class="annotation">(slide 40)</span></h3>
+    <p><em>To be written:</em> the four-layer stack (block device → partition → filesystem → mount point), <code>lsblk</code>, <code>findmnt</code>, <code>mkfs</code>, <code>mount</code>/<code>umount</code>, <code>/etc/fstab</code> and the UUID-not-device-path rule, swap.</p>
+
+    <h3>LVM <span class="annotation">(slide 41)</span></h3>
+    <p><em>To be written:</em> the PV → VG → LV layering, the six commands that cover 90% of LVM operations, snapshots, when LVM matters and when it doesn't.</p>
+
+    <h3>Logs <span class="annotation">(slide 42)</span></h3>
+    <p><em>To be written:</em> the text-file half (<code>/var/log/syslog</code>, <code>/var/log/auth.log</code>, per-service dirs, <code>logrotate</code>) and the systemd half (<code>journalctl -xe</code>, <code>-u</code>, <code>-f</code>, <code>-p err</code>, <code>--since</code>, <code>--disk-usage</code>).</p>
+
+    <h3>Writing your own systemd service <span class="annotation">(slide 43)</span></h3>
+    <p><em>To be written:</em> the <code>[Unit]</code>/<code>[Service]</code>/<code>[Install]</code> section model, <code>ExecStart</code>, <code>User=</code>, <code>Restart=</code>, <code>WantedBy=multi-user.target</code>, pairing with a <code>.timer</code>, <code>daemon-reload</code> after every edit.</p>
+
+    <h3>Networking — survival kit <span class="annotation">(slide 44)</span></h3>
+    <p><em>To be written:</em> <code>ip addr</code>, <code>ip route</code>, <code>ping</code>, <code>ss -tlnp</code>, <code>curl</code>, <code>dig</code> — the six commands that get you unstuck before Course 04 picks up networking properly.</p>
+
+    <h2>Next steps</h2>
+    <p>If you've read this far you have the foundation for the rest of the program. The natural next stop is <strong>Course 02 — Shell Scripting</strong>, which picks up where the "From one-liners to scripts" section leaves off — turning shell muscle memory into reliable automation. After that, <strong>Course 03 — Git &amp; Version Control</strong> and <strong>Course 04 — Networking &amp; SSH</strong> round out the toolkit you need before containers, Kubernetes, and the rest of the program.</p>
+
+    <footer class="doc-footer">
+      <span>Course 01 — Linux Fundamentals · Guide</span>
+      <span><a href="../index.html">↩ course home</a></span>
+    </footer>
+  </article>
+</body>
+</html>

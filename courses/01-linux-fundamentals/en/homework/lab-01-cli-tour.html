@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lab 01 — CLI Tour — Linux Fundamentals</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../index.html">Academy</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">Course 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">EN</a>
+    <span class="sep">/</span>
+    <span class="here">Lab 01 — CLI Tour</span>
+    <span class="lang-switch">
+      <a href="lab-01-cli-tour.html" class="active">EN</a>
+      <a href="../../he/homework/lab-01-cli-tour.html">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">Course 01 · Linux Fundamentals · Homework</div>
+    <h1>Lab 01 — CLI Tour</h1>
+    <p class="lede">Move around a Linux filesystem with confidence — navigate, create, inspect, copy, and clean up entirely from the shell.</p>
+
+    <table class="meta">
+      <tbody>
+        <tr><th>Course</th><td>01 — Linux Fundamentals</td></tr>
+        <tr><th>Time</th><td>~45 minutes</td></tr>
+        <tr><th>Deliverable</th><td><code>~/lab-01/transcript.txt</code> + <code>~/lab-01/tree.txt</code> + a one-paragraph reflection</td></tr>
+        <tr><th>Maps to slides</th><td>4–9 (Part 01 — The Shell)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Goal</h2>
+    <p>Sit down at any Linux box and feel oriented in under thirty seconds. You should leave this lab able to navigate, create files, view them, copy/rename, and clean up safely — without reaching for a search engine.</p>
+
+    <h2>Setup</h2>
+    <p>You need a working terminal in a real Linux environment:</p>
+    <ul>
+      <li>A Linux VM (multipass, VirtualBox, UTM, Lima, etc.),</li>
+      <li>WSL2 on Windows,</li>
+      <li>A cloud VM you can SSH into, or</li>
+      <li>macOS — most commands work, but a few flags differ (notably <code>ls</code>, <code>tail</code>, and <code>stat</code>).</li>
+    </ul>
+    <p>Open a terminal. Confirm you're in your home directory:</p>
+<pre><code>echo $HOME
+pwd</code></pre>
+    <p>If <code>pwd</code> doesn't match <code>$HOME</code>, run <code>cd ~</code> first.</p>
+
+    <h2>Tasks</h2>
+    <p>Work through these in order. Don't paste blindly — read each line before you press Enter, especially the destructive ones.</p>
+
+    <h3><span class="stepnum">01</span>Orient yourself</h3>
+<pre><code>whoami            # who am I logged in as
+hostname          # what machine
+pwd               # where am I
+ls                # what's here
+ls -la            # the whole truth — including hidden files</code></pre>
+    <p>Now poke at the system itself — without changing anything:</p>
+<pre><code>ls /              # top of the filesystem
+ls /etc | head    # configuration files
+ls /var/log       # log files</code></pre>
+    <blockquote>Questions to answer for yourself: how many top-level directories does <code>/</code> have? Roughly how many files live in <code>/etc</code>?</blockquote>
+
+    <h3><span class="stepnum">02</span>Build a workspace</h3>
+    <p>Create a nested directory in one shot:</p>
+<pre><code>mkdir -p ~/lab-01/{notes,scripts,logs}
+cd ~/lab-01
+ls -la</code></pre>
+    <p>You should see three directories. <code>mkdir -p</code> is idempotent — running it again is harmless.</p>
+
+    <h3><span class="stepnum">03</span>Create some files</h3>
+    <p>Three ways to make a file:</p>
+<pre><code>touch notes/hello.md                              # empty file
+echo "first line"  &gt; notes/journal.md             # overwrite (one-line file)
+echo "second line" &gt;&gt; notes/journal.md            # append
+printf "alpha\nbeta\ngamma\n" &gt; notes/letters.md  # multi-line</code></pre>
+    <p>Confirm:</p>
+<pre><code>ls -la notes/
+cat notes/journal.md
+cat notes/letters.md</code></pre>
+
+    <h3><span class="stepnum">04</span>View files</h3>
+    <p>Try every reader on the same file:</p>
+<pre><code>cat notes/letters.md
+head -n 2 notes/letters.md
+tail -n 2 notes/letters.md
+less notes/letters.md      # press q to quit; /alpha then n/N to search</code></pre>
+    <p>Now try the live one. In <strong>terminal A</strong>:</p>
+<pre><code>tail -f logs/live.log</code></pre>
+    <p>In a <strong>second terminal</strong> (open a new tab):</p>
+<pre><code>cd ~/lab-01
+for i in 1 2 3; do
+  echo "event $i" &gt;&gt; logs/live.log
+  sleep 1
+done</code></pre>
+    <p>Watch terminal A. The new lines appear as they're written. This is how engineers watch production logs. Press <code>Ctrl + C</code> in terminal A when done.</p>
+
+    <h3><span class="stepnum">05</span>List like a pro</h3>
+<pre><code>ls -l notes/                # long format
+ls -lah notes/              # + human-readable sizes, + hidden
+ls -ltr notes/              # sorted by time, oldest first
+ls -lSr notes/              # sorted by size, smallest first</code></pre>
+    <p>Read the columns of <code>ls -l</code> carefully — permissions, links, owner, group, size, date, name. (Slide 08 has the anatomy diagram.)</p>
+
+    <h3><span class="stepnum">06</span>Use the help system</h3>
+    <p>Without searching the web, find:</p>
+    <ul>
+      <li>The flag for <code>cp</code> that preserves permissions and timestamps.</li>
+      <li>The flag for <code>rm</code> that prompts before each deletion.</li>
+      <li>What <code>tee</code> does.</li>
+    </ul>
+    <p>Use these tools:</p>
+<pre><code>man cp           # full manual; press q to quit
+cp --help        # quick reference
+whatis tee       # one-line description
+type ls          # is it a binary, alias, or builtin?
+which ls         # where on $PATH does it live</code></pre>
+
+    <h3><span class="stepnum">07</span>Copy, rename, and move</h3>
+<pre><code>cp notes/letters.md notes/letters-backup.md
+cp -r notes scripts/notes-copy
+mv notes/hello.md notes/intro.md          # rename (same dir)
+mv notes/intro.md scripts/                # move (different dir)
+ls -R                                     # recursive listing</code></pre>
+
+    <h3><span class="stepnum">08</span>Clean up — carefully</h3>
+    <p>Always <code>ls</code> what you're about to delete, then delete:</p>
+<pre><code>ls scripts/notes-copy
+rm -i scripts/notes-copy/letters.md       # -i = confirm each
+rm -r scripts/notes-copy                  # remove the directory + contents</code></pre>
+    <div class="callout warn">
+      <strong>Danger —</strong> never type <code>rm -rf ~</code> or <code>rm -rf /</code>, even as a joke. There is no undo.
+    </div>
+
+    <h3><span class="stepnum">09</span>Capture your work</h3>
+    <p>Save two artifacts inside <code>~/lab-01/</code>:</p>
+<pre><code>cd ~/lab-01
+history | tail -n 100 &gt; transcript.txt    # the last 100 commands you ran
+find . -type f -o -type d | sort &gt; tree.txt
+cat tree.txt</code></pre>
+    <p>These two files are the deliverable.</p>
+
+    <h2>Hints</h2>
+    <ul>
+      <li><strong>Tab completion</strong> is your superpower. Press <code>Tab</code> once to complete; twice to list options.</li>
+      <li><strong>Forgot <code>sudo</code>?</strong> <code>sudo !!</code> reruns the last command with <code>sudo</code> prepended.</li>
+      <li><strong><code>pwd</code> often.</strong> Three letters, one Enter — never wonder where you are.</li>
+      <li><strong>Be paranoid about <code>rm -rf</code>.</strong> Habit-form <code>ls</code> first, <code>rm -i</code> when unsure.</li>
+      <li><strong><code>Ctrl + R</code></strong> searches your history live. Try it.</li>
+      <li><strong><code>Ctrl + C</code></strong> cancels the current command. <strong><code>Ctrl + Z</code></strong> suspends it (resume with <code>fg</code>).</li>
+    </ul>
+
+    <h2>Deliverable</h2>
+    <p>Submit (paste into a doc, push to a repo, or commit alongside your homework):</p>
+    <ol>
+      <li><code>~/lab-01/transcript.txt</code> — your command history.</li>
+      <li><code>~/lab-01/tree.txt</code> — the resulting directory tree.</li>
+      <li>A one-paragraph reflection answering: which command surprised you, and which one will you reach for most often?</li>
+    </ol>
+
+    <h2>Stretch (optional)</h2>
+    <ul>
+      <li><strong>Pipe + count:</strong> how many files (not directories) live in <code>/etc</code>? Build the answer with <code>ls</code>, <code>grep</code>, and <code>wc -l</code>.</li>
+      <li><strong>Five biggest log files</strong> in <code>/var/log</code>: combine <code>ls -lS</code> with <code>head</code>.</li>
+      <li><strong><code>script(1)</code>:</strong> start a recording with <code>script ~/lab-01/session.log</code>, do some commands, then <code>exit</code>. Open the log — see what got captured.</li>
+      <li><strong>Watch a kernel buffer:</strong> <code>dmesg | tail</code>. What's the most recent thing the kernel logged?</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>Course 01 — Linux Fundamentals · Lab 01</span>
+      <span><a href="../index.html">↩ course home</a></span>
+    </footer>
+  </article>
+</body>
+</html>

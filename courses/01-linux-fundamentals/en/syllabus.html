@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Course 01 — Linux Fundamentals — Syllabus</title>
+  <link rel="stylesheet" href="../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../index.html">Academy</a>
+    <span class="sep">/</span>
+    <a href="../index.html">Course 01</a>
+    <span class="sep">/</span>
+    <a href="index.html">EN</a>
+    <span class="sep">/</span>
+    <span class="here">Syllabus</span>
+    <span class="lang-switch">
+      <a href="syllabus.html" class="active">EN</a>
+      <a href="../he/syllabus.html">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">Course 01 · Linux Fundamentals</div>
+    <h1>Course 01 — Linux Fundamentals — Syllabus</h1>
+    <p class="lede">From "I've never opened a terminal" to "I can comfortably live in one." The first hands-on course of the program.</p>
+
+    <h2>At a glance</h2>
+    <table class="meta">
+      <tbody>
+        <tr><th>Duration</th><td>~2 weeks (8–12 hours of contact time + lab work)</td></tr>
+        <tr><th>Level</th><td>Beginner — assumes you can use a computer but not a terminal</td></tr>
+        <tr><th>Prerequisites</th><td>Course 00 — DevOps Intro (recommended)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Overview</h2>
+    <p>Students go from "I've never opened a terminal" to "I can stand up, operate, and troubleshoot a Linux box on my own." The course is taught in four parts: <strong>the shell</strong> (commands, paths, redirection, pipes, globbing); <strong>shell power-ups</strong> (aliases, history, line-editing, jobs, <code>PATH</code>, prompts, scripting basics); <strong>under the hood</strong> (kernel vs user space, system calls, sudo, boot, systemd, the FHS); and <strong>operating the system</strong> — package management, vi, permissions, users &amp; groups, processes &amp; resources, archives, scheduled tasks, storage and filesystems, LVM, logs, and writing your own systemd service. Every concept has a command to type, every lab has output to show.</p>
+
+    <h2>Learning outcomes</h2>
+    <p>By the end of this course, a student will be able to:</p>
+    <ul>
+      <li>Navigate any Linux filesystem with <code>pwd</code>, <code>cd</code>, <code>ls</code>, <code>pushd</code>/<code>popd</code>, <code>find</code>, absolute vs relative paths.</li>
+      <li>Create, copy, move, delete, and symlink files and directories — including recursive operations with the right flags.</li>
+      <li>Read files (<code>cat</code>, <code>less</code>, <code>head</code>/<code>tail -f</code>) and shape streams with pipes, redirection (<code>&gt;</code>, <code>2&gt;</code>, <code>&amp;&gt;</code>), and the text toolkit (<code>grep</code>, <code>cut</code>, <code>sort</code>, <code>wc</code>, <code>tr</code>, <code>tee</code>).</li>
+      <li>Use the help system (<code>man</code>, <code>--help</code>, <code>info</code>, <code>whatis</code>, <code>apropos</code>, <code>man hier</code>) without reaching for a search engine first.</li>
+      <li>Customize a shell environment: aliases, history expansion, <code>PATH</code>, prompt (<code>PS1</code>), and pick a shell intentionally.</li>
+      <li>Explain the kernel / user-space boundary, demonstrate it with <code>strace</code>, and use <code>sudo</code> responsibly.</li>
+      <li>Trace the boot process end-to-end (BIOS/UEFI → bootloader → kernel + initrd → init/systemd → login shell), read systemd targets, and inspect running services with <code>systemctl</code> &amp; <code>journalctl</code>.</li>
+      <li>Identify all seven Linux file types by symbol, and navigate the FHS by purpose (<code>/bin</code>, <code>/etc</code>, <code>/var</code>, <code>/usr</code>, <code>/proc</code>, <code>/sys</code>, etc.).</li>
+      <li>Install, update, and remove software on both Debian/Ubuntu (<code>apt</code> + <code>dpkg</code>) and RHEL/Fedora (<code>dnf</code> + <code>rpm</code>); add a third-party repository with GPG verification.</li>
+      <li>Edit files in <code>vi</code> at survival level — modes, save/quit, search, basic editing.</li>
+      <li>Manage file permissions and ownership (<code>chmod</code> symbolic + octal, <code>chown</code>, SUID/SGID/sticky bit, <code>umask</code>) and manage users &amp; groups (<code>useradd</code>, <code>usermod</code>, <code>passwd</code>, <code>groupadd</code>, <code>/etc/passwd</code>).</li>
+      <li>Inspect processes and system resources with <code>top</code>, <code>ps</code>, <code>free</code>, <code>df</code>, <code>du</code>; send signals with <code>kill</code>.</li>
+      <li>Bundle archives (<code>tar</code>, <code>gzip</code>, <code>zstd</code>) and schedule periodic tasks with <code>cron</code> or systemd timers.</li>
+      <li>Mount filesystems, edit <code>/etc/fstab</code>, and understand LVM (PV → VG → LV) at a conceptual level.</li>
+      <li>Read logs from <code>/var/log</code> and with <code>journalctl</code> — filter by time, severity, and service; recognise <code>logrotate</code> rules.</li>
+      <li>Write a custom <code>.service</code> systemd unit (paired with a <code>.timer</code> for periodic runs) and enable it on boot.</li>
+    </ul>
+
+    <h2>Schedule</h2>
+    <table>
+      <thead>
+        <tr><th style="width: 12%;">Session</th><th style="width: 56%;">Topic</th><th>Reference</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Why Linux. Short history. First commands. File operations.</td><td>slides pp. 1–6</td></tr>
+        <tr><td>2</td><td><code>find</code>. Viewing files. Reading <code>ls -l</code>. Help system.</td><td>slides pp. 7–11 · <a href="homework/lab-01-cli-tour.html">lab-01</a></td></tr>
+        <tr><td>3</td><td>History &amp; aliases, line-editing, jobs, pipes &amp; globbing, text tools.</td><td>slides pp. 12–17</td></tr>
+        <tr><td>4</td><td><code>PATH</code>. Prompt customization. Scripting 101.</td><td>slides pp. 18–21 · <a href="homework/lab-02-pipes-and-path.html">lab-02</a></td></tr>
+        <tr><td>5</td><td>Kernel vs user space. <code>sudo</code>. Boot. systemd targets. FHS.</td><td>slides pp. 22–28 · <a href="homework/lab-03-boot-and-fhs.html">lab-03</a></td></tr>
+        <tr><td>6</td><td>Package management (apt + dpkg, dnf + rpm, repos). <code>vi</code>. Permissions, special bits, users &amp; groups.</td><td>slides pp. 29–36 · <a href="homework/lab-04-permissions-and-users.html"><code>lab-04-permissions-and-users</code></a></td></tr>
+        <tr><td>7</td><td>Processes &amp; resources. Archives. <code>cron</code> &amp; timers. Storage, mounts, LVM. Logs. Writing a systemd service. Networking teaser.</td><td>slides pp. 37–44 · <a href="homework/lab-05-storage-and-services.html"><code>lab-05-storage-and-services</code></a></td></tr>
+        <tr><td>8</td><td>Final project review + Q&amp;A.</td><td><a href="final/project.html">final/project.html</a></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Deliverables</h2>
+    <ul>
+      <li><strong>Homework labs</strong> — 5 labs:
+        <ul>
+          <li><a href="homework/lab-01-cli-tour.html"><code>lab-01-cli-tour</code></a> — guided shell tour (navigate, create, view, delete).</li>
+          <li><a href="homework/lab-02-pipes-and-path.html"><code>lab-02-pipes-and-path</code></a> — compose commands with pipes and globs; modify <code>PATH</code>.</li>
+          <li><a href="homework/lab-03-boot-and-fhs.html"><code>lab-03-boot-and-fhs</code></a> — inspect the boot timeline, list systemd services, walk the FHS.</li>
+          <li><a href="homework/lab-04-permissions-and-users.html"><code>lab-04-permissions-and-users</code></a> — create users, set group ownership, walk SUID/SGID, run <code>chmod</code> scenarios.</li>
+          <li><a href="homework/lab-05-storage-and-services.html"><code>lab-05-storage-and-services</code></a> — mount a loopback device, edit <code>/etc/fstab</code>, write a <code>.service</code> + <code>.timer</code>, watch it fire.</li>
+        </ul>
+      </li>
+      <li><strong>Final project</strong> — <a href="final/project.html">Make a Linux Box Yours</a> — provision a fresh Linux box, customize it end-to-end, add a user and a custom systemd service, mount a volume, build a system report with pipes, and ship the whole thing as a Git repo (~3–5 hr).</li>
+    </ul>
+
+    <h2>Resources</h2>
+    <ul>
+      <li><strong>Slides</strong> — <code>slides/linux-fundamentals/</code> — run <code>pnpm dev</code>, open <code>/s/linux-fundamentals</code>.</li>
+      <li><strong>Cheat sheet</strong> — <a href="docs/cheat-sheet.html"><code>docs/cheat-sheet.html</code></a> — one-page HTML reference. Open in a browser, print to PDF if needed.</li>
+      <li><strong>External:</strong>
+        <ul>
+          <li><a href="https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html">Linux Filesystem Hierarchy Standard (FHS)</a> — the canonical reference.</li>
+          <li><a href="https://tldp.org/">The Linux Documentation Project</a> — long-form guides.</li>
+          <li><code>man hier</code> — describes the filesystem layout right from your terminal.</li>
+          <li><a href="https://linuxcommand.org/"><em>The Linux Command Line</em></a> (William Shotts, free PDF) — excellent companion book.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <h2>Assessment</h2>
+    <p>A student passes the course when they have:</p>
+    <ol>
+      <li>Completed all five homework labs (deliverables submitted as command transcripts + short reflections).</li>
+      <li>Submitted the final project: a working Linux environment with the customizations described, plus a short write-up of the boot sequence and the systemd service they added.</li>
+      <li>Demonstrated, in conversation, that they can answer: <em>"what happens when I press Enter on <code>ls -l /etc</code>?"</em> — touching shell, PATH, syscalls, and kernel.</li>
+    </ol>
+
+    <footer class="doc-footer">
+      <span>Course 01 — Linux Fundamentals · DevOps Academy</span>
+      <span><a href="index.html">↩ course home</a></span>
+    </footer>
+  </article>
+</body>
+</html>

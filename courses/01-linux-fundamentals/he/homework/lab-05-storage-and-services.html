@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>מעבדה 05 — אחסון ושירותים — יסודות לינוקס</title>
+  <link rel="stylesheet" href="../../../../assets/styles.css" />
+</head>
+<body>
+  <nav class="site-nav">
+    <a href="../../../../he/index.html">אקדמיה</a>
+    <span class="sep">/</span>
+    <a href="../../index.html">קורס 01</a>
+    <span class="sep">/</span>
+    <a href="../index.html">עברית</a>
+    <span class="sep">/</span>
+    <span class="here">מעבדה 05 — אחסון ושירותים</span>
+    <span class="lang-switch">
+      <a href="../../en/homework/lab-05-storage-and-services.html">EN</a>
+      <a href="lab-05-storage-and-services.html" class="active">עברית</a>
+    </span>
+  </nav>
+
+  <article class="doc">
+    <div class="eyebrow">קורס 01 · יסודות לינוקס · שיעורי בית</div>
+    <h1>מעבדה 05 — אחסון ושירותים</h1>
+    <p class="lede">צרו דיסק מדומה מקובץ רגיל, פרמטו אותו, מאונטו אותו, גרמו ל-mount לשרוד reboot, ואז כתבו שירות systemd + timer שיכתבו אליו לפי לוח זמנים. צפו בכל זה מתבצע דרך <code>journalctl</code>.</p>
+
+    <table class="meta">
+      <tbody>
+        <tr><th>קורס</th><td>01 — יסודות לינוקס</td></tr>
+        <tr><th>זמן</th><td>כ-75 דקות</td></tr>
+        <tr><th>תוצר</th><td><code>~/lab-05/transcript.txt</code> + השורה שלכם ב-<code>/etc/fstab</code> + <code>backup.service</code> ו-<code>backup.timer</code> + פסקת רפלקציה</td></tr>
+        <tr><th>מצגות תואמות</th><td>40–43 (חלק 04 — תפעול המערכת)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>מטרה</h2>
+    <p>בסיום המעבדה תוכלו: לבנות block device מקובץ רגיל (loopback), להניח עליו filesystem, למאונט אותו, לגרום לו לשרוד reboot דרך <code>/etc/fstab</code> עם UUID (אף פעם לא נתיב device), ולכתוב שירות systemd משלכם בשילוב timer שמריץ אותו לפי לוח זמנים.</p>
+
+    <h2>הקמה</h2>
+    <p>נדרשת מכונת לינוקס אמיתית עם sudo — VM, WSL2, או מכונה בענן. <strong>אל תשתמשו ב-Docker</strong>: גם loopback mounts וגם systemd מלא מתנהגים שונה ב-containers.</p>
+<pre><code>mkdir -p ~/lab-05
+cd ~/lab-05
+script -q transcript.txt        # התחלת הקלטה של כל מה שתעשו
+# (הריצו :exit או Ctrl-D כשגמרתם)</code></pre>
+
+    <h2>משימות</h2>
+
+    <h3><span class="stepnum">01</span>בדיקה של מה שכבר ממואנט</h3>
+<pre><code>lsblk                          # block devices
+findmnt                        # עץ של mounts
+df -h                          # שטח פנוי לפי mount
+cat /etc/fstab                 # מה ממואנט ב-boot</code></pre>
+    <p>שימו לב למבנה: block device → partition אופציונלי → filesystem → mount point.</p>
+
+    <h3><span class="stepnum">02</span>בניית loopback device</h3>
+    <p>Loopback device הוא קובץ רגיל שהקרנל מתייחס אליו כאל block device — מושלם לתרגול בלי דיסק נוסף.</p>
+<pre><code># 256 MB של אפסים, ואז נגרום לקרנל לחבר loop device לקובץ
+sudo dd if=/dev/zero of=/var/disks/lab.img bs=1M count=256 status=progress
+sudo losetup -fP --show /var/disks/lab.img    # מדפיס /dev/loopN (זכרו את זה)
+lsblk                                          # ה-device החדש אמור להופיע</code></pre>
+    <div class="callout">
+      <strong>מה קרה כאן —</strong> <code>losetup -fP --show</code> מוצא את מספר ה-loop הפנוי הבא (<code>-f</code>), מבקש מהקרנל לסרוק partitions (<code>-P</code>), ומדפיס את ה-device path: <code>LOOP=$(sudo losetup -fP --show /var/disks/lab.img)</code>.
+    </div>
+
+    <h3><span class="stepnum">03</span>פורמט עם filesystem</h3>
+<pre><code>LOOP=$(sudo losetup -j /var/disks/lab.img | awk -F: '{print $1}')
+echo "$LOOP"                                   # אישור
+
+sudo mkfs.ext4 -L LAB "$LOOP"                  # ext4 עם label LAB
+sudo blkid "$LOOP"                             # שמרו את ה-UUID</code></pre>
+    <p>העתיקו את ה-UUID ש-<code>blkid</code> מדפיס — תזדקקו לו בשלב 5.</p>
+
+    <h3><span class="stepnum">04</span>Mount ידני</h3>
+<pre><code>sudo mkdir -p /mnt/lab
+sudo mount "$LOOP" /mnt/lab
+findmnt /mnt/lab                               # אימות
+df -h /mnt/lab                                 # שטח פנוי
+
+# כתבו משהו
+echo "hello from $(date)" | sudo tee /mnt/lab/hello.txt
+ls -l /mnt/lab</code></pre>
+
+    <h3><span class="stepnum">05</span>שמירת ה-mount דרך <code>/etc/fstab</code></h3>
+    <p>נתיב כמו <code>/dev/loop0</code> יכול להשתנות בין boots — אבל UUID לעולם לא. תמיד מאונטו לפי UUID ב-<code>/etc/fstab</code>.</p>
+<pre><code>UUID=$(sudo blkid -s UUID -o value "$LOOP")
+echo "$UUID"
+
+# הוסיפו את השורה ל-fstab (אמתו את ה-UUID לפני!)
+echo "UUID=$UUID  /mnt/lab  ext4  loop,defaults,nofail  0  2" | sudo tee -a /etc/fstab
+
+# מאונטו מחדש את הכל מ-fstab כדי לאמת
+sudo umount /mnt/lab
+sudo mount -a                                  # מאונטים את כל מה ש-fstab מגדיר
+findmnt /mnt/lab                               # חזר, ממואנט דרך fstab</code></pre>
+    <div class="callout warn">
+      <strong>האפשרות <code>nofail</code> חשובה.</strong> בלעדיה, דיסק חסר או שבור ב-boot יזרוק את המערכת למצב emergency rescue. <code>nofail</code> אומר "אם ה-mount הזה נכשל, המשיכו ב-boot". לדיסקים לא קריטיים (הכל חוץ מ-root), תמיד <code>nofail</code>.
+    </div>
+
+    <h3><span class="stepnum">06</span>כתיבת שירות systemd</h3>
+    <p>צרו את <code>/usr/local/bin/lab-tick.sh</code> — הסקריפט שהשירות יריץ:</p>
+<pre><code>sudo tee /usr/local/bin/lab-tick.sh &gt;/dev/null &lt;&lt;'EOF'
+#!/bin/bash
+set -euo pipefail
+echo "[$(date --iso-8601=seconds)] tick on $(hostname)" &gt;&gt; /mnt/lab/tick.log
+EOF
+sudo chmod +x /usr/local/bin/lab-tick.sh
+sudo /usr/local/bin/lab-tick.sh                # בדיקת עשן
+cat /mnt/lab/tick.log</code></pre>
+    <p>כעת כתבו את ה-service unit ב-<code>/etc/systemd/system/lab-tick.service</code>:</p>
+<pre><code>sudo tee /etc/systemd/system/lab-tick.service &gt;/dev/null &lt;&lt;'EOF'
+[Unit]
+Description=Lab 05 — write one tick into the lab disk
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/lab-tick.sh
+EOF</code></pre>
+
+    <h3><span class="stepnum">07</span>שילוב עם timer</h3>
+    <p>וה-timer ב-<code>/etc/systemd/system/lab-tick.timer</code> — אותו שם, סיומת <code>.timer</code>. systemd מקשר אותם אוטומטית.</p>
+<pre><code>sudo tee /etc/systemd/system/lab-tick.timer &gt;/dev/null &lt;&lt;'EOF'
+[Unit]
+Description=Run lab-tick every minute
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=1min
+AccuracySec=1s
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now lab-tick.timer
+systemctl list-timers --all | grep lab-tick     # מתי הוא מופעל בפעם הבאה</code></pre>
+
+    <h3><span class="stepnum">08</span>צפייה בפעולה</h3>
+<pre><code>journalctl -u lab-tick.service -f               # מעקב חי; Ctrl-C לעצירה
+# חכו כ-2 דקות
+cat /mnt/lab/tick.log                           # רשומה כל דקה</code></pre>
+
+    <h3><span class="stepnum">09</span>בדיקת ה-unit והפעילות האחרונה</h3>
+<pre><code>systemctl status lab-tick.service
+systemctl status lab-tick.timer
+systemctl cat lab-tick.service                  # מציג את קובץ ה-unit שממנו הוא רץ
+journalctl -u lab-tick.service --since "10 min ago"</code></pre>
+
+    <h3><span class="stepnum">10</span>ניקוי <em>(אופציונלי אך מומלץ)</em></h3>
+<pre><code>sudo systemctl disable --now lab-tick.timer
+sudo rm /etc/systemd/system/lab-tick.{service,timer}
+sudo systemctl daemon-reload
+
+sudo umount /mnt/lab
+sudo sed -i.bak "/$UUID/d" /etc/fstab           # הסרת השורה מ-fstab
+sudo losetup -d "$LOOP"
+sudo rm /var/disks/lab.img /usr/local/bin/lab-tick.sh
+sudo rmdir /mnt/lab</code></pre>
+
+    <h2>טיפים</h2>
+    <ul>
+      <li>תמיד מאונטו לפי <strong>UUID</strong> (או <strong>LABEL</strong>) ב-<code>/etc/fstab</code>, לעולם לא לפי device path. מספרי device מתחלפים בין boots.</li>
+      <li>אם <code>mount -a</code> נכשל, גם ה-boot ייכשל. בדקו לפני שעושים reboot — זו בדיוק הסיבה שמריצים את זה ידנית קודם.</li>
+      <li><code>systemctl daemon-reload</code> נדרש אחרי כל עריכה של unit file. בלעדיו, השינוי החדש לא יחול והקונפיג הישן ימשיך לפעול בשקט.</li>
+      <li>השם של קובץ ה-timer חייב להתאים לקובץ ה-service — <code>foo.timer</code> מפעיל את <code>foo.service</code> כברירת מחדל. לשירות אחר, הוסיפו <code>Unit=other.service</code> תחת <code>[Timer]</code>.</li>
+      <li><code>Persistent=true</code> אומר ל-systemd: אם ה-timer היה אמור להפעיל בזמן שהמכונה כבויה, הריצו פעם אחת ב-boot כדי להשלים.</li>
+    </ul>
+
+    <h2>תוצר</h2>
+    <ol>
+      <li><code>~/lab-05/transcript.txt</code> — הקלטת הסשן המלאה שלכם.</li>
+      <li>השורה המדויקת שהוספתם ל-<code>/etc/fstab</code>.</li>
+      <li>התוכן של <code>/etc/systemd/system/lab-tick.service</code> ו-<code>lab-tick.timer</code>.</li>
+      <li>פסקת רפלקציה אחת: <em>למה מאונטים לפי UUID במקום device path? למה קיים פיצול בין timer ל-service — האם cron לא היה עושה את אותו דבר?</em></li>
+    </ol>
+
+    <h2>אתגרים</h2>
+    <ul>
+      <li>שנו את ה-timer לשימוש ב-<strong>calendar expression</strong> (<code>OnCalendar=*:0/5</code> — כל 5 דקות לפי שעון הקיר) במקום <code>OnUnitActiveSec</code>. אמתו עם <code>systemd-analyze calendar "*:0/5"</code>.</li>
+      <li>הוסיפו <code>RandomizedDelaySec=10s</code> תחת <code>[Timer]</code> וצפו איך זמני ההפעלה האמיתיים מתפזרים.</li>
+      <li>הגדילו את ה-loopback: עצרו את ה-timer, <code>truncate -s 512M /var/disks/lab.img</code>, <code>losetup -c "$LOOP"</code>, <code>resize2fs "$LOOP"</code>, מאונטו מחדש, אמתו עם <code>df -h /mnt/lab</code>.</li>
+      <li>גרמו לשירות לרוץ כמשתמש לא-root. הוסיפו <code>User=youruser</code> ב-<code>[Service]</code> ועדכנו <code>chown</code> על ה-mount בהתאם.</li>
+    </ul>
+
+    <footer class="doc-footer">
+      <span>מעבדה 05 — אחסון ושירותים · קורס 01</span>
+      <span><a href="../index.html">↩ דף הקורס</a></span>
+    </footer>
+  </article>
+</body>
+</html>

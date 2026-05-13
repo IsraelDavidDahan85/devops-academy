@@ -265,6 +265,44 @@ The user uploads the real file via the Assets panel, then clicks the placeholder
 
 Size the placeholder to the slot it occupies. Pass `width`/`height` when the layout has a fixed image box; omit them when the placeholder fills a flex/grid cell. The `hint` should describe the *content* the user needs ("Q3 revenue chart") not the *role* ("hero image").
 
+## Q&A pause pages (project convention)
+
+> Project-specific: this section captures a convention used in this repo (DevOps Academy). The framework doesn't require it; the project does. Look in `slides/linux-fundamentals/index.tsx` for the canonical implementation.
+
+Every deck that uses `SectionDivider`s also gets a **`PausePage` between each pair of sections AND one at the end of the deck.** The shape:
+
+- **Eyebrow:** `End of <section>` in mono / coral, uppercase.
+- **Hero:** the word **Questions?** at the largest type-scale step (≈200–220px).
+- **Two-column body:**
+  - Left — "we just covered" bullets recapping the section that just ended.
+  - Right — "up next" callout showing the next section's title (or, for the closing pause, what comes after the deck — next course, "your first week", etc.).
+
+Implement as a single reusable component instantiated per pause, e.g.:
+
+```tsx
+const PausePage = ({
+  pageNum, section, next, children,
+}: {
+  pageNum: number;
+  section: string;          // section that just ended
+  next: string;             // section title (or post-deck destination)
+  children: React.ReactNode; // <li> bullets for the "we just covered" list
+}) => (
+  <PageFrame pageNum={pageNum} eyebrow="PAUSE">
+    {/* End of <section> eyebrow → Questions? hero → 2-col recap/next */}
+  </PageFrame>
+);
+
+const ShellPause:   Page = () => <PausePage pageNum={11} section="The Shell"  next="Power-ups.">{/* <li> recap */}</PausePage>;
+const ClosingPause: Page = () => <PausePage pageNum={28} section="Linux Fundamentals" next="Course 02 — Shell Scripting.">{/* recap */}</PausePage>;
+```
+
+Each pause is a real page: it increments `TOTAL`, gets its own entry in the default export, and counts in `pageNum`.
+
+Skip pauses only when:
+- The deck has no section dividers (e.g. a 3-page micro-deck), **or**
+- The user explicitly asks for a no-pause flow.
+
 ## Repeated elements: component, not `map`
 
 When a page has visually repeated items — cards, logo rows, gallery tiles, list rows, step indicators — **define a small component and instantiate it once per item**. Do **not** render the group with `array.map` over a data array.
