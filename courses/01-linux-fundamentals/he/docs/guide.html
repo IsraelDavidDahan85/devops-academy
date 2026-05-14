@@ -1,11 +1,38 @@
 <!doctype html>
-<html lang="he" dir="rtl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+<html lang="he" dir="rtl"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>יסודות לינוקס — מדריך</title>
-  <link rel="stylesheet" href="../../../../assets/styles.css" />
-</head>
+  <link rel="stylesheet" href="../../../../assets/styles.css">
+<style id="jc-autofill-preloader-styles">
+      .jc-autofill-preloader {
+        position: absolute;
+        cursor: pointer;
+        z-index: 999999;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, transform 0.15s ease;
+        background: transparent;
+        border-radius: 3px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .jc-autofill-preloader:hover {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: scale(1.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+      
+      .jc-autofill-preloader img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+    </style></head>
 <body>
   <nav class="site-nav">
     <a href="../../../../he/index.html">אקדמיה</a>
@@ -68,11 +95,10 @@ mv *.log archive/               # העברת קבצים רבים בבת אחת
 rm -r old/                      # מחיקה רקורסיבית
 rm -rf old/                     # …כפויה, בלי שאלות. מסוכן.</code></pre>
     <p>ה-<code>-r</code> של <code>cp</code> הוא הראשון שכדאי להפנים — בלעדיו, העתקת תיקייה נכשלת. <code>cp -p</code> מיועד למקרה שאתם באמת מעוניינים לשמר timestamps והרשאות (סקריפטי deployment מעוניינים). <code>ln -s</code> יוצר <em>symlink</em>: מצביע לנתיב אחר. Symlinks נמצאים בכל מקום במערכת לינוקס אמיתית — חצי מ-<code>/usr/bin</code> הם symlinks ל-alternates.</p>
-    <div class="callout warn">
-      <strong>החטא הקרדינלי.</strong> <code>rm -rf</code> לא שואל פעמיים. לפני שאתם לוחצים Enter על פקודת <code>rm</code> שמשתמשת במשתנה (<code>$DIR</code>) או ב-glob (<code>*</code>), הריצו <code>ls</code> על אותו נתיב קודם. מספר הקריירות שכמעט הסתיימו ב-<code>rm -rf "$BASE/$SUB"</code> כש-<code>$BASE</code> התברר ריק — בלתי נספר.
+    <div class="callout warn"><strong>זהירות!!!</strong>&nbsp;<code>rm -rf</code> לא שואל פעמיים. לפני שאתם לוחצים Enter על פקודת <code>rm</code> שמשתמשת במשתנה (<code>$DIR</code>) או ב-glob (<code>*</code>), הריצו <code>ls</code> על אותו נתיב קודם. מספר הקריירות שכמעט הסתיימו ב-<code>rm -rf "$BASE/$SUB"</code> כש-<code>$BASE</code> התברר ריק — בלתי נספר.
     </div>
 
-    <h3 id="find">ציד עם <code>find</code> <span class="annotation">(שקופית 7)</span></h3>
+    <h3 id="find">צייד עם <code>find</code> <span class="annotation">(שקופית 7)</span></h3>
     <p>בעוד <code>ls</code> רק מציג מה יש בתיקייה הנוכחית, <code>find</code> צועד על העץ כולו ומסנן תוך כדי הליכה. זה הכלי הנכון בכל פעם שאתם צריכים לשאול את מערכת הקבצים שאלה מעניינת יותר מ"מה כאן?"</p>
 <pre><code>find . -name "*.log"            # כל קובץ .log תחת התיקייה הנוכחית
 find /home -type f -size +100M  # קבצים רגילים שגדולים מ-100 MB
@@ -215,5 +241,9 @@ type ll             # binary, alias, function או builtin?</code></pre>
       <span><a href="../index.html">↩ דף הקורס</a></span>
     </footer>
   </article>
-</body>
-</html>
+
+
+
+
+
+</body></html>

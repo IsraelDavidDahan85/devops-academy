@@ -46,7 +46,7 @@ start_one() {
 }
 
 echo "Starting dev servers..."
-start_one "academy" "$ACADEMY_PORT" "python3 -m http.server $ACADEMY_PORT"
+start_one "academy" "$ACADEMY_PORT" "python3 dev-server.py $ACADEMY_PORT"
 start_one "slides"  "$SLIDES_PORT"  "npm run dev"
 
 # Give them a beat to bind, then report status.
