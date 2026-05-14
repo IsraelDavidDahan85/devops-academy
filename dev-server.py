@@ -6,6 +6,8 @@ Replaces `python3 -m http.server 8000` for local development of the academy site
 - Serves files from the repo root (current working directory of this file).
 - Injects `<script src="/assets/editor.js" defer data-dev-injected="1">` into
   every HTML response, just before `</body>`. The HTML on disk is untouched.
+- Rewrites `href="/s/..."` → `href="http://localhost:5173/s/..."` so the
+  academy's deployed-relative slide links open the local Vite slides server.
 - Accepts `PUT /<path>.html` and writes the body to that file. Safety-checked:
   only inside the repo, only existing `.html` files.
 - Disables caching so saves show up on reload immediately.
@@ -27,6 +29,11 @@ INJECT = (
     b'<script src="/assets/editor.js" defer data-dev-injected="1"></script>\n'
     b'</body>'
 )
+
+# The slides Vite dev server runs on a separate port; HTML on disk uses
+# domain-relative `/s/<id>` (correct for the single-domain Vercel deploy),
+# so locally we rewrite to the Vite origin.
+SLIDES_DEV_ORIGIN = b"http://localhost:5173"
 
 
 class DevHandler(http.server.SimpleHTTPRequestHandler):
@@ -56,6 +63,8 @@ class DevHandler(http.server.SimpleHTTPRequestHandler):
                     body = f.read()
             except OSError:
                 return super().do_GET()
+            # Rewrite slide hrefs to the local Vite origin.
+            body = body.replace(b'href="/s/', b'href="' + SLIDES_DEV_ORIGIN + b'/s/')
             # Inject the editor script before </body>. If there's no </body>
             # (rare — chooser pages have one), skip injection rather than fail.
             if b"</body>" in body:
