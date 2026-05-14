@@ -1,5 +1,7 @@
 {
+  "buildCommand": "pnpm build && mv dist/index.html dist/_slides.html && cp index.html dist/index.html && cp -r he dist/he && cp assets/styles.css dist/assets/styles.css && rsync -a --exclude=slides courses/ dist/courses/",
+  "outputDirectory": "dist",
   "rewrites": [
-    { "source": "/s/:slug*", "destination": "/index.html" }
+    { "source": "/s/:slug*", "destination": "/_slides.html" }
   ]
 }
